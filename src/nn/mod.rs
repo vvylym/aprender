@@ -77,7 +77,9 @@ pub use loss::{
 };
 pub use module::Module;
 pub use normalization::{BatchNorm1d, GroupNorm, InstanceNorm, LayerNorm, RMSNorm};
-pub use optim::{Adam, AdamW, AdamWState, Optimizer, RMSprop, SGD};
+pub use optim::{
+    Adam, AdamState, AdamW, AdamWState, Optimizer, RMSprop, RMSpropState, SGDState, SGD,
+};
 pub use rnn::{Bidirectional, GRU, LSTM};
 pub use scheduler::{
     CosineAnnealingLR, ExponentialLR, LRScheduler, LinearWarmup, PlateauMode, ReduceLROnPlateau,

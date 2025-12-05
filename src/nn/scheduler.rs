@@ -534,6 +534,19 @@ mod tests {
     }
 
     impl Optimizer for MockOptimizer {
+        type State = ();
+
+        fn get_state(&self) -> Option<Self::State> {
+            None
+        }
+
+        fn restore_state(
+            &mut self,
+            _state: Self::State,
+            _params: &[&crate::autograd::Tensor],
+        ) -> Result<(), String> {
+            Err("Mock optimizer does not support state restoration".to_string())
+        }
         fn step(&mut self) {}
         fn zero_grad(&mut self) {}
         fn lr(&self) -> f32 {

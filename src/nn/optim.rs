@@ -41,6 +41,10 @@ use serde::{Deserialize, Serialize};
 
 /// Common trait for all optimizers.
 pub trait Optimizer {
+    /// Type of the optimizer's state.
+    /// Use `()` for stateless optimizers, or a concrete state type for optimizers with state.
+    type State: Serialize + for<'de> Deserialize<'de>;
+
     /// Perform a single optimization step using computed gradients.
     fn step(&mut self);
 
@@ -52,6 +56,25 @@ pub trait Optimizer {
 
     /// Set learning rate (for schedulers).
     fn set_lr(&mut self, lr: f32);
+
+    /// Get optimizer state for serialization (if supported).
+    ///
+    /// Returns `None` for optimizers without state (e.g., vanilla SGD without momentum).
+    /// Returns `Some(state)` for optimizers with state that can be serialized.
+    ///
+    /// # Returns
+    /// `Option<Self::State>` - Serializable state, or None if not supported
+    fn get_state(&self) -> Option<Self::State>;
+
+    /// Restore optimizer state from serialized representation (if supported).
+    ///
+    /// # Arguments
+    /// * `state` - Serialized optimizer state
+    /// * `params` - Current model parameters (must match original parameter order)
+    ///
+    /// # Errors
+    /// Returns error if state restoration is not supported, parameter count mismatch, or invalid state
+    fn restore_state(&mut self, state: Self::State, params: &[&Tensor]) -> Result<(), String>;
 }
 
 /// Stochastic Gradient Descent optimizer with momentum.
@@ -181,10 +204,9 @@ impl SGD {
 }
 
 impl Optimizer for SGD {
+    type State = SGDState;
+
     fn step(&mut self) {
-        // We need to get mutable access to the tensors through the global graph
-        // For now, this is a placeholder that demonstrates the pattern
-        // In practice, users will call update_param directly with their tensors
         self.initialized = true;
     }
 
@@ -201,6 +223,33 @@ impl Optimizer for SGD {
     fn set_lr(&mut self, lr: f32) {
         self.lr = lr;
     }
+
+    fn get_state(&self) -> Option<Self::State> {
+        // Only support state if momentum is enabled (has velocities)
+        if self.momentum == 0.0 && self.velocities.is_empty() {
+            return None;
+        }
+        Some(self.get_state_internal())
+    }
+
+    fn restore_state(&mut self, state: Self::State, params: &[&Tensor]) -> Result<(), String> {
+        self.restore_state_internal(state, params)
+    }
+}
+
+/// Serializable optimizer state for SGD.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SGDState {
+    /// Learning rate
+    pub lr: f32,
+    /// Momentum factor
+    pub momentum: f32,
+    /// Weight decay
+    pub weight_decay: f32,
+    /// Nesterov momentum enabled
+    pub nesterov: bool,
+    /// Velocity buffers (one Vec<f32> per parameter)
+    pub velocities: Vec<Vec<f32>>,
 }
 
 impl SGD {
@@ -208,10 +257,58 @@ impl SGD {
     ///
     /// This is the recommended way to use SGD in a training loop.
     pub fn step_with_params(&mut self, params: &mut [&mut Tensor]) {
+        // Initialize state for all parameters (even if no gradients)
+        if !self.initialized || self.velocities.len() < params.len() {
+            if self.velocities.len() < params.len() {
+                self.velocities.resize(params.len(), Vec::new());
+            }
+            for (idx, param) in params.iter().enumerate() {
+                if self.velocities[idx].is_empty() {
+                    let param_data = param.data();
+                    self.velocities[idx] = vec![0.0; param_data.len()];
+                }
+            }
+        }
+
         for (idx, param) in params.iter_mut().enumerate() {
             self.update_param(param, idx);
         }
         self.initialized = true;
+    }
+
+    /// Get optimizer state for serialization (internal helper).
+    fn get_state_internal(&self) -> SGDState {
+        SGDState {
+            lr: self.lr,
+            momentum: self.momentum,
+            weight_decay: self.weight_decay,
+            nesterov: self.nesterov,
+            velocities: self.velocities.clone(),
+        }
+    }
+
+    /// Restore optimizer state from serialized representation (internal helper).
+    fn restore_state_internal(
+        &mut self,
+        state: SGDState,
+        params: &[&Tensor],
+    ) -> Result<(), String> {
+        if state.velocities.len() != params.len() {
+            return Err(format!(
+                "Parameter count mismatch: state has {}, model has {}",
+                state.velocities.len(),
+                params.len()
+            ));
+        }
+
+        self.lr = state.lr;
+        self.momentum = state.momentum;
+        self.weight_decay = state.weight_decay;
+        self.nesterov = state.nesterov;
+        self.velocities = state.velocities;
+        self.initialized = true;
+
+        Ok(())
     }
 }
 
@@ -336,14 +433,94 @@ impl Adam {
     /// Perform optimization step with direct tensor access.
     pub fn step_with_params(&mut self, params: &mut [&mut Tensor]) {
         self.t += 1;
+
+        // Initialize state for all parameters
+        if !self.initialized || self.m.len() < params.len() {
+            if self.m.len() < params.len() {
+                self.m.resize(params.len(), Vec::new());
+                self.v.resize(params.len(), Vec::new());
+            }
+            for (idx, param) in params.iter().enumerate() {
+                if self.m[idx].is_empty() {
+                    let param_data = param.data();
+                    self.m[idx] = vec![0.0; param_data.len()];
+                    self.v[idx] = vec![0.0; param_data.len()];
+                }
+            }
+        }
+
         for (idx, param) in params.iter_mut().enumerate() {
             self.update_param(param, idx);
         }
         self.initialized = true;
     }
+
+    /// Get optimizer state for serialization (internal helper).
+    fn get_state_internal(&self) -> AdamState {
+        AdamState {
+            step: self.t,
+            lr: self.lr,
+            m: self.m.clone(),
+            v: self.v.clone(),
+            beta1: self.beta1,
+            beta2: self.beta2,
+            eps: self.eps,
+            weight_decay: self.weight_decay,
+        }
+    }
+
+    /// Restore optimizer state from serialized representation (internal helper).
+    fn restore_state_internal(
+        &mut self,
+        state: AdamState,
+        params: &[&Tensor],
+    ) -> Result<(), String> {
+        if state.m.len() != params.len() {
+            return Err(format!(
+                "Parameter count mismatch: state has {}, model has {}",
+                state.m.len(),
+                params.len()
+            ));
+        }
+
+        self.t = state.step;
+        self.lr = state.lr;
+        self.m = state.m;
+        self.v = state.v;
+        self.beta1 = state.beta1;
+        self.beta2 = state.beta2;
+        self.eps = state.eps;
+        self.weight_decay = state.weight_decay;
+        self.initialized = true;
+
+        Ok(())
+    }
+}
+
+/// Serializable optimizer state for Adam.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdamState {
+    /// Step counter
+    pub step: usize,
+    /// Learning rate
+    pub lr: f32,
+    /// First moment estimates (one Vec<f32> per parameter)
+    pub m: Vec<Vec<f32>>,
+    /// Second moment estimates (one Vec<f32> per parameter)
+    pub v: Vec<Vec<f32>>,
+    /// Beta1 hyperparameter
+    pub beta1: f32,
+    /// Beta2 hyperparameter
+    pub beta2: f32,
+    /// Epsilon hyperparameter
+    pub eps: f32,
+    /// Weight decay hyperparameter
+    pub weight_decay: f32,
 }
 
 impl Optimizer for Adam {
+    type State = AdamState;
+
     fn step(&mut self) {
         self.t += 1;
         self.initialized = true;
@@ -361,6 +538,14 @@ impl Optimizer for Adam {
 
     fn set_lr(&mut self, lr: f32) {
         self.lr = lr;
+    }
+
+    fn get_state(&self) -> Option<Self::State> {
+        Some(self.get_state_internal())
+    }
+
+    fn restore_state(&mut self, state: Self::State, params: &[&Tensor]) -> Result<(), String> {
+        self.restore_state_internal(state, params)
     }
 }
 
@@ -516,25 +701,8 @@ impl AdamW {
         self.initialized = true;
     }
 
-    /// Get optimizer state for serialization.
-    ///
-    /// Returns a serializable representation of the optimizer's internal state,
-    /// including moment estimates (m, v) and step count.
-    ///
-    /// # Returns
-    /// `AdamWState` containing all optimizer state
-    ///
-    /// # Example
-    /// ```rust
-    /// use aprender::autograd::Tensor;
-    /// use aprender::nn::optim::AdamW;
-    ///
-    /// let mut param = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
-    /// let optimizer = AdamW::new(vec![&mut param], 0.001);
-    /// let state = optimizer.get_state();
-    /// // Serialize state: serde_json::to_string(&state).unwrap()
-    /// ```
-    pub fn get_state(&self) -> AdamWState {
+    /// Get optimizer state for serialization (internal helper).
+    fn get_state_internal(&self) -> AdamWState {
         AdamWState {
             step: self.t,
             lr: self.lr,
@@ -547,28 +715,12 @@ impl AdamW {
         }
     }
 
-    /// Restore optimizer state from serialized representation.
-    ///
-    /// # Arguments
-    /// * `state` - Serialized optimizer state
-    /// * `params` - Current model parameters (must match original parameter order)
-    ///
-    /// # Errors
-    /// Returns error if parameter count doesn't match state
-    ///
-    /// # Example
-    /// ```rust
-    /// use aprender::autograd::Tensor;
-    /// use aprender::nn::optim::AdamW;
-    ///
-    /// let mut param = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
-    /// let mut optimizer = AdamW::new(vec![&mut param], 0.001);
-    /// // ... training ...
-    /// let state = optimizer.get_state();
-    /// // ... later, restore ...
-    /// optimizer.restore_state(state, &[&param]).unwrap();
-    /// ```
-    pub fn restore_state(&mut self, state: AdamWState, params: &[&Tensor]) -> Result<(), String> {
+    /// Restore optimizer state from serialized representation (internal helper).
+    fn restore_state_internal(
+        &mut self,
+        state: AdamWState,
+        params: &[&Tensor],
+    ) -> Result<(), String> {
         if state.m.len() != params.len() {
             return Err(format!(
                 "Parameter count mismatch: state has {}, model has {}",
@@ -599,6 +751,8 @@ impl AdamW {
 }
 
 impl Optimizer for AdamW {
+    type State = AdamWState;
+
     fn step(&mut self) {
         self.t += 1;
         self.initialized = true;
@@ -616,6 +770,14 @@ impl Optimizer for AdamW {
 
     fn set_lr(&mut self, lr: f32) {
         self.lr = lr;
+    }
+
+    fn get_state(&self) -> Option<Self::State> {
+        Some(self.get_state_internal())
+    }
+
+    fn restore_state(&mut self, state: Self::State, params: &[&Tensor]) -> Result<(), String> {
+        self.restore_state_internal(state, params)
     }
 }
 
@@ -728,14 +890,89 @@ impl RMSprop {
     }
 
     pub fn step_with_params(&mut self, params: &mut [&mut Tensor]) {
+        // Initialize state for all parameters
+        if !self.initialized || self.v.len() < params.len() {
+            if self.v.len() < params.len() {
+                self.v.resize(params.len(), Vec::new());
+                self.buffer.resize(params.len(), Vec::new());
+            }
+            for (idx, param) in params.iter().enumerate() {
+                if self.v[idx].is_empty() {
+                    let param_data = param.data();
+                    self.v[idx] = vec![0.0; param_data.len()];
+                    self.buffer[idx] = vec![0.0; param_data.len()];
+                }
+            }
+        }
+
         for (idx, param) in params.iter_mut().enumerate() {
             self.update_param(param, idx);
         }
         self.initialized = true;
     }
+
+    /// Get optimizer state for serialization (internal helper).
+    fn get_state_internal(&self) -> RMSpropState {
+        RMSpropState {
+            lr: self.lr,
+            v: self.v.clone(),
+            buffer: self.buffer.clone(),
+            alpha: self.alpha,
+            eps: self.eps,
+            weight_decay: self.weight_decay,
+            momentum: self.momentum,
+        }
+    }
+
+    /// Restore optimizer state from serialized representation (internal helper).
+    fn restore_state_internal(
+        &mut self,
+        state: RMSpropState,
+        params: &[&Tensor],
+    ) -> Result<(), String> {
+        if state.v.len() != params.len() {
+            return Err(format!(
+                "Parameter count mismatch: state has {}, model has {}",
+                state.v.len(),
+                params.len()
+            ));
+        }
+
+        self.lr = state.lr;
+        self.v = state.v;
+        self.buffer = state.buffer;
+        self.alpha = state.alpha;
+        self.eps = state.eps;
+        self.weight_decay = state.weight_decay;
+        self.momentum = state.momentum;
+        self.initialized = true;
+
+        Ok(())
+    }
+}
+
+/// Serializable optimizer state for RMSprop.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RMSpropState {
+    /// Learning rate
+    pub lr: f32,
+    /// Running average of squared gradients (one Vec<f32> per parameter)
+    pub v: Vec<Vec<f32>>,
+    /// Momentum buffer (one Vec<f32> per parameter)
+    pub buffer: Vec<Vec<f32>>,
+    /// Alpha hyperparameter
+    pub alpha: f32,
+    /// Epsilon hyperparameter
+    pub eps: f32,
+    /// Weight decay hyperparameter
+    pub weight_decay: f32,
+    /// Momentum hyperparameter
+    pub momentum: f32,
 }
 
 impl Optimizer for RMSprop {
+    type State = RMSpropState;
+
     fn step(&mut self) {
         self.initialized = true;
     }
@@ -752,6 +989,14 @@ impl Optimizer for RMSprop {
 
     fn set_lr(&mut self, lr: f32) {
         self.lr = lr;
+    }
+
+    fn get_state(&self) -> Option<Self::State> {
+        Some(self.get_state_internal())
+    }
+
+    fn restore_state(&mut self, state: Self::State, params: &[&Tensor]) -> Result<(), String> {
+        self.restore_state_internal(state, params)
     }
 }
 
@@ -944,21 +1189,16 @@ mod tests {
             optimizer.step_with_params(&mut [&mut param1, &mut param2]);
         }
 
-        let state = optimizer.get_state();
+        let state = optimizer.get_state().expect("should have state");
         assert_eq!(state.step, 3);
         assert!((state.lr - 0.001).abs() < 1e-6);
         // After step_with_params, m and v should be initialized
-        // They may be empty if update_param wasn't called (no gradients), so check after first step
-        if state.m.is_empty() {
-            // If empty, that's okay - state is still valid, just not initialized yet
-            assert_eq!(state.m.len(), 0);
-            assert_eq!(state.v.len(), 0);
-        } else {
-            assert_eq!(state.m.len(), 2);
-            assert_eq!(state.v.len(), 2);
-            assert!(!state.m[0].is_empty());
-            assert!(!state.v[0].is_empty());
-        }
+        assert_eq!(state.m.len(), 2);
+        assert_eq!(state.v.len(), 2);
+        assert_eq!(state.m[0].len(), 2); // param1 has 2 elements
+        assert_eq!(state.m[1].len(), 2); // param2 has 2 elements
+        assert_eq!(state.v[0].len(), 2);
+        assert_eq!(state.v[1].len(), 2);
     }
 
     #[test]
@@ -978,19 +1218,19 @@ mod tests {
         }
 
         // Save state
-        let saved_state = optimizer.get_state();
+        let saved_state = optimizer.get_state().expect("should have state");
         assert_eq!(saved_state.step, 5);
 
         // Create new optimizer and restore state
         let mut new_param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
         let mut new_param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
-        let new_optimizer = AdamW::new(vec![&mut new_param1, &mut new_param2], 0.001);
+        let mut new_optimizer = AdamW::new(vec![&mut new_param1, &mut new_param2], 0.001);
 
         new_optimizer
-            .restore_state(saved_state, &[&new_param1, &new_param2])
+            .restore_state(saved_state.clone(), &[&new_param1, &new_param2])
             .expect("restore_state should succeed");
 
-        let restored_state = new_optimizer.get_state();
+        let restored_state = new_optimizer.get_state().expect("should have state");
         assert_eq!(restored_state.step, 5);
         assert!((restored_state.lr - 0.001).abs() < 1e-6);
         assert_eq!(restored_state.m.len(), 2);
@@ -1001,9 +1241,9 @@ mod tests {
     fn test_adamw_restore_state_parameter_mismatch() {
         let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
         let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
-        let mut optimizer = AdamW::new(vec![&mut param1, &mut param2], 0.001);
+        let optimizer = AdamW::new(vec![&mut param1, &mut param2], 0.001);
 
-        let state = optimizer.get_state();
+        let state = optimizer.get_state().expect("should have state");
 
         // Try to restore with wrong number of parameters
         let mut wrong_param = Tensor::from_slice(&[1.0]).requires_grad();
@@ -1012,5 +1252,72 @@ mod tests {
         let result = wrong_optimizer.restore_state(state, &[&wrong_param]);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Parameter count mismatch"));
+    }
+
+    #[test]
+    fn test_sgd_get_state() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = SGD::with_momentum(vec![&mut param1, &mut param2], 0.01, 0.9);
+
+        // Run a few steps
+        for _ in 0..3 {
+            optimizer.zero_grad();
+            let grad1 = Tensor::from_slice(&[0.1, 0.2]);
+            let grad2 = Tensor::from_slice(&[0.3, 0.4]);
+            param1.accumulate_grad(grad1);
+            param2.accumulate_grad(grad2);
+            optimizer.step_with_params(&mut [&mut param1, &mut param2]);
+        }
+
+        let state = optimizer.get_state().expect("should have state");
+        assert!((state.lr - 0.01).abs() < 1e-6);
+        assert!((state.momentum - 0.9).abs() < 1e-6);
+        assert_eq!(state.velocities.len(), 2);
+    }
+
+    #[test]
+    fn test_adam_get_state() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = Adam::new(vec![&mut param1, &mut param2], 0.001);
+
+        // Run a few steps
+        for _ in 0..3 {
+            optimizer.zero_grad();
+            let grad1 = Tensor::from_slice(&[0.1, 0.2]);
+            let grad2 = Tensor::from_slice(&[0.3, 0.4]);
+            param1.accumulate_grad(grad1);
+            param2.accumulate_grad(grad2);
+            optimizer.step_with_params(&mut [&mut param1, &mut param2]);
+        }
+
+        let state = optimizer.get_state().expect("should have state");
+        assert_eq!(state.step, 3);
+        assert_eq!(state.m.len(), 2);
+        assert_eq!(state.v.len(), 2);
+    }
+
+    #[test]
+    fn test_rmsprop_get_state() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = RMSprop::new(vec![&mut param1, &mut param2], 0.01).momentum(0.9);
+
+        // Run a few steps
+        for _ in 0..3 {
+            optimizer.zero_grad();
+            let grad1 = Tensor::from_slice(&[0.1, 0.2]);
+            let grad2 = Tensor::from_slice(&[0.3, 0.4]);
+            param1.accumulate_grad(grad1);
+            param2.accumulate_grad(grad2);
+            optimizer.step_with_params(&mut [&mut param1, &mut param2]);
+        }
+
+        let state = optimizer.get_state().expect("should have state");
+        assert!((state.lr - 0.01).abs() < 1e-6);
+        assert!((state.momentum - 0.9).abs() < 1e-6);
+        assert_eq!(state.v.len(), 2);
+        assert_eq!(state.buffer.len(), 2);
     }
 }
