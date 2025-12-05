@@ -114,6 +114,32 @@ pub fn clear_grad(id: TensorId) {
     with_graph(|graph| graph.clear_grad(id));
 }
 
+/// Scale gradient for a specific tensor by ID.
+///
+/// This is useful for gradient clipping, where gradients are scaled
+/// to maintain a maximum norm.
+///
+/// # Arguments
+/// * `id` - Tensor ID
+/// * `scale` - Scaling factor to apply to the gradient
+///
+/// # Returns
+/// `true` if gradient was scaled, `false` if no gradient exists for this tensor
+///
+/// # Example
+/// ```rust
+/// use aprender::autograd::{Tensor, scale_grad};
+///
+/// let mut t = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+/// t.accumulate_grad(Tensor::from_slice(&[2.0, 4.0]));
+/// scale_grad(t.id(), 0.5);
+/// let grad = t.grad().unwrap();
+/// assert_eq!(grad.data(), &[1.0, 2.0]);
+/// ```
+pub fn scale_grad(id: TensorId, scale: f32) -> bool {
+    with_graph(|graph| graph.scale_grad(id, scale))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -142,5 +168,51 @@ mod tests {
         });
 
         assert!(is_grad_enabled());
+    }
+
+    #[test]
+    fn test_scale_grad() {
+        let mut t = Tensor::from_slice(&[1.0, 2.0, 3.0]).requires_grad();
+        let id = t.id();
+
+        // Register tensor in graph (needed for graph-level scale_grad to work)
+        with_graph(|graph| {
+            graph.register_tensor(t.clone());
+        });
+
+        // Accumulate a gradient
+        t.accumulate_grad(Tensor::from_slice(&[2.0, 4.0, 6.0]));
+
+        // Also update the graph's copy
+        with_graph(|graph| {
+            if let Some(graph_tensor) = graph.get_tensor_mut(id) {
+                graph_tensor.accumulate_grad(Tensor::from_slice(&[2.0, 4.0, 6.0]));
+            }
+        });
+
+        // Scale the gradient via module-level function
+        let scaled = scale_grad(id, 0.5);
+        assert!(scaled, "scale_grad should return true when gradient exists");
+
+        let grad = get_grad(id).expect("grad should exist after scaling");
+        assert_eq!(grad.data(), &[1.0, 2.0, 3.0]);
+
+        // Scale again
+        scale_grad(id, 2.0);
+        let grad2 = get_grad(id).expect("grad should exist after second scaling");
+        assert_eq!(grad2.data(), &[2.0, 4.0, 6.0]);
+    }
+
+    #[test]
+    fn test_scale_grad_no_gradient() {
+        let t = Tensor::from_slice(&[1.0, 2.0, 3.0]);
+        let id = t.id();
+
+        // Try to scale when no gradient exists
+        let scaled = scale_grad(id, 0.5);
+        assert!(
+            !scaled,
+            "scale_grad should return false when no gradient exists"
+        );
     }
 }

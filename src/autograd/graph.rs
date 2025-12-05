@@ -171,6 +171,25 @@ impl ComputationGraph {
             tensor.clear_grad();
         }
     }
+
+    /// Scale gradient for a specific tensor by a scalar value.
+    ///
+    /// This is useful for gradient clipping, where gradients are scaled
+    /// to maintain a maximum norm.
+    ///
+    /// # Arguments
+    /// * `id` - Tensor ID
+    /// * `scale` - Scaling factor to apply to the gradient
+    ///
+    /// # Returns
+    /// `true` if gradient was scaled, `false` if no gradient exists for this tensor
+    pub fn scale_grad(&mut self, id: TensorId, scale: f32) -> bool {
+        if let Some(tensor) = self.tensors.get_mut(&id) {
+            tensor.scale_grad(scale)
+        } else {
+            false
+        }
+    }
 }
 
 impl Default for ComputationGraph {

@@ -200,6 +200,38 @@ impl Tensor {
         self.grad = None;
     }
 
+    /// Scale the gradient by a scalar value (in-place).
+    ///
+    /// This is useful for gradient clipping, where gradients are scaled
+    /// to maintain a maximum norm.
+    ///
+    /// # Arguments
+    /// * `scale` - Scaling factor to apply to the gradient
+    ///
+    /// # Returns
+    /// `true` if gradient was scaled, `false` if no gradient exists
+    ///
+    /// # Example
+    /// ```rust
+    /// use aprender::autograd::Tensor;
+    ///
+    /// let mut t = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+    /// t.accumulate_grad(Tensor::from_slice(&[2.0, 4.0]));
+    /// t.scale_grad(0.5);
+    /// let grad = t.grad().unwrap();
+    /// assert_eq!(grad.data(), &[1.0, 2.0]);
+    /// ```
+    pub fn scale_grad(&mut self, scale: f32) -> bool {
+        if let Some(ref mut grad) = self.grad {
+            let grad_data = grad.data().to_vec();
+            let scaled_data: Vec<f32> = grad_data.iter().map(|&x| x * scale).collect();
+            **grad = Tensor::new(&scaled_data, &self.shape);
+            true
+        } else {
+            false
+        }
+    }
+
     /// Accumulate gradient (used during backward pass).
     pub(crate) fn accumulate_grad(&mut self, grad: Tensor) {
         match &mut self.grad {

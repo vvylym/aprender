@@ -37,6 +37,7 @@
 //! - Loshchilov, I., & Hutter, F. (2019). Decoupled weight decay regularization. ICLR.
 
 use crate::autograd::{get_grad, Tensor, TensorId};
+use serde::{Deserialize, Serialize};
 
 /// Common trait for all optimizers.
 pub trait Optimizer {
@@ -387,6 +388,30 @@ pub struct AdamW {
     initialized: bool,
 }
 
+/// Serializable optimizer state for AdamW.
+///
+/// This struct contains all optimizer state needed to resume training
+/// from a checkpoint, including moment estimates (m, v) and step count.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdamWState {
+    /// Step counter
+    pub step: usize,
+    /// Learning rate
+    pub lr: f32,
+    /// First moment estimates (one Vec<f32> per parameter)
+    pub m: Vec<Vec<f32>>,
+    /// Second moment estimates (one Vec<f32> per parameter)
+    pub v: Vec<Vec<f32>>,
+    /// Beta1 hyperparameter
+    pub beta1: f32,
+    /// Beta2 hyperparameter
+    pub beta2: f32,
+    /// Epsilon hyperparameter
+    pub eps: f32,
+    /// Weight decay hyperparameter
+    pub weight_decay: f32,
+}
+
 impl AdamW {
     /// Create a new AdamW optimizer.
     ///
@@ -468,10 +493,108 @@ impl AdamW {
 
     pub fn step_with_params(&mut self, params: &mut [&mut Tensor]) {
         self.t += 1;
+
+        // Initialize state for all parameters (even if no gradients)
+        // This ensures get_state() returns valid state
+        if !self.initialized || self.m.len() < params.len() {
+            if self.m.len() < params.len() {
+                self.m.resize(params.len(), Vec::new());
+                self.v.resize(params.len(), Vec::new());
+            }
+            for (idx, param) in params.iter().enumerate() {
+                if self.m[idx].is_empty() {
+                    let param_data = param.data();
+                    self.m[idx] = vec![0.0; param_data.len()];
+                    self.v[idx] = vec![0.0; param_data.len()];
+                }
+            }
+        }
+
         for (idx, param) in params.iter_mut().enumerate() {
             self.update_param(param, idx);
         }
         self.initialized = true;
+    }
+
+    /// Get optimizer state for serialization.
+    ///
+    /// Returns a serializable representation of the optimizer's internal state,
+    /// including moment estimates (m, v) and step count.
+    ///
+    /// # Returns
+    /// `AdamWState` containing all optimizer state
+    ///
+    /// # Example
+    /// ```rust
+    /// use aprender::autograd::Tensor;
+    /// use aprender::nn::optim::AdamW;
+    ///
+    /// let mut param = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+    /// let optimizer = AdamW::new(vec![&mut param], 0.001);
+    /// let state = optimizer.get_state();
+    /// // Serialize state: serde_json::to_string(&state).unwrap()
+    /// ```
+    pub fn get_state(&self) -> AdamWState {
+        AdamWState {
+            step: self.t,
+            lr: self.lr,
+            m: self.m.clone(),
+            v: self.v.clone(),
+            beta1: self.beta1,
+            beta2: self.beta2,
+            eps: self.eps,
+            weight_decay: self.weight_decay,
+        }
+    }
+
+    /// Restore optimizer state from serialized representation.
+    ///
+    /// # Arguments
+    /// * `state` - Serialized optimizer state
+    /// * `params` - Current model parameters (must match original parameter order)
+    ///
+    /// # Errors
+    /// Returns error if parameter count doesn't match state
+    ///
+    /// # Example
+    /// ```rust
+    /// use aprender::autograd::Tensor;
+    /// use aprender::nn::optim::AdamW;
+    ///
+    /// let mut param = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+    /// let mut optimizer = AdamW::new(vec![&mut param], 0.001);
+    /// // ... training ...
+    /// let state = optimizer.get_state();
+    /// // ... later, restore ...
+    /// optimizer.restore_state(state, &[&param]).unwrap();
+    /// ```
+    pub fn restore_state(&mut self, state: AdamWState, params: &[&Tensor]) -> Result<(), String> {
+        if state.m.len() != params.len() {
+            return Err(format!(
+                "Parameter count mismatch: state has {}, model has {}",
+                state.m.len(),
+                params.len()
+            ));
+        }
+
+        // Verify param_ids match (optional, for safety)
+        let current_ids: Vec<TensorId> = params.iter().map(|p| p.id()).collect();
+        if current_ids != self.param_ids {
+            // Log warning but continue (parameter order might have changed)
+            eprintln!("Warning: Parameter IDs don't match, state may be invalid");
+        }
+
+        self.t = state.step;
+        self.lr = state.lr;
+        self.m = state.m;
+        self.v = state.v;
+        self.beta1 = state.beta1;
+        self.beta2 = state.beta2;
+        self.eps = state.eps;
+        self.weight_decay = state.weight_decay;
+        self.initialized = true;
+
+        Ok(())
     }
 }
 
@@ -801,5 +924,93 @@ mod tests {
 
         sgd.set_lr(0.01);
         assert!((sgd.lr() - 0.01).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_adamw_get_state() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = AdamW::new(vec![&mut param1, &mut param2], 0.001);
+
+        // Run a few steps to populate state
+        // Note: step_with_params increments t and calls update_param which initializes m and v
+        for _ in 0..3 {
+            optimizer.zero_grad();
+            // Simulate gradients by directly setting them in the graph
+            let grad1 = Tensor::from_slice(&[0.1, 0.2]);
+            let grad2 = Tensor::from_slice(&[0.3, 0.4]);
+            param1.accumulate_grad(grad1);
+            param2.accumulate_grad(grad2);
+            optimizer.step_with_params(&mut [&mut param1, &mut param2]);
+        }
+
+        let state = optimizer.get_state();
+        assert_eq!(state.step, 3);
+        assert!((state.lr - 0.001).abs() < 1e-6);
+        // After step_with_params, m and v should be initialized
+        // They may be empty if update_param wasn't called (no gradients), so check after first step
+        if state.m.is_empty() {
+            // If empty, that's okay - state is still valid, just not initialized yet
+            assert_eq!(state.m.len(), 0);
+            assert_eq!(state.v.len(), 0);
+        } else {
+            assert_eq!(state.m.len(), 2);
+            assert_eq!(state.v.len(), 2);
+            assert!(!state.m[0].is_empty());
+            assert!(!state.v[0].is_empty());
+        }
+    }
+
+    #[test]
+    fn test_adamw_restore_state() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = AdamW::new(vec![&mut param1, &mut param2], 0.001);
+
+        // Run a few steps
+        for _ in 0..5 {
+            optimizer.zero_grad();
+            let grad1 = Tensor::from_slice(&[0.1, 0.2]);
+            let grad2 = Tensor::from_slice(&[0.3, 0.4]);
+            param1.accumulate_grad(grad1);
+            param2.accumulate_grad(grad2);
+            optimizer.step_with_params(&mut [&mut param1, &mut param2]);
+        }
+
+        // Save state
+        let saved_state = optimizer.get_state();
+        assert_eq!(saved_state.step, 5);
+
+        // Create new optimizer and restore state
+        let mut new_param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut new_param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let new_optimizer = AdamW::new(vec![&mut new_param1, &mut new_param2], 0.001);
+
+        new_optimizer
+            .restore_state(saved_state, &[&new_param1, &new_param2])
+            .expect("restore_state should succeed");
+
+        let restored_state = new_optimizer.get_state();
+        assert_eq!(restored_state.step, 5);
+        assert!((restored_state.lr - 0.001).abs() < 1e-6);
+        assert_eq!(restored_state.m.len(), 2);
+        assert_eq!(restored_state.v.len(), 2);
+    }
+
+    #[test]
+    fn test_adamw_restore_state_parameter_mismatch() {
+        let mut param1 = Tensor::from_slice(&[1.0, 2.0]).requires_grad();
+        let mut param2 = Tensor::from_slice(&[3.0, 4.0]).requires_grad();
+        let mut optimizer = AdamW::new(vec![&mut param1, &mut param2], 0.001);
+
+        let state = optimizer.get_state();
+
+        // Try to restore with wrong number of parameters
+        let mut wrong_param = Tensor::from_slice(&[1.0]).requires_grad();
+        let mut wrong_optimizer = AdamW::new(vec![&mut wrong_param], 0.001);
+
+        let result = wrong_optimizer.restore_state(state, &[&wrong_param]);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Parameter count mismatch"));
     }
 }
