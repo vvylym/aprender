@@ -1,0 +1,1371 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>apr (APR Model Operations CLI) - EXTREME TDD - The Aprender Guide to Zero-Defect Machine Learning</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive guide to EXTREME TDD methodology: RED-GREEN-REFACTOR cycles, mutation testing, and Toyota Way principles demonstrated through ML library development">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Methodology</li><li class="chapter-item expanded "><a href="../methodology/what-is-extreme-tdd.html"><strong aria-hidden="true">1.</strong> What is EXTREME TDD?</a></li><li class="chapter-item expanded "><a href="../methodology/red-green-refactor.html"><strong aria-hidden="true">2.</strong> The RED-GREEN-REFACTOR Cycle</a></li><li class="chapter-item expanded "><a href="../methodology/test-first-philosophy.html"><strong aria-hidden="true">3.</strong> Test-First Philosophy</a></li><li class="chapter-item expanded "><a href="../methodology/zero-tolerance.html"><strong aria-hidden="true">4.</strong> Zero Tolerance Quality</a></li><li class="chapter-item expanded affix "><li class="part-title">The RED Phase</li><li class="chapter-item expanded "><a href="../red-phase/failing-tests-first.html"><strong aria-hidden="true">5.</strong> Writing Failing Tests First</a></li><li class="chapter-item expanded "><a href="../red-phase/test-categories.html"><strong aria-hidden="true">6.</strong> Test Categories</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../red-phase/unit-tests.html"><strong aria-hidden="true">6.1.</strong> Unit Tests</a></li><li class="chapter-item expanded "><a href="../red-phase/integration-tests.html"><strong aria-hidden="true">6.2.</strong> Integration Tests</a></li><li class="chapter-item expanded "><a href="../red-phase/property-based-tests.html"><strong aria-hidden="true">6.3.</strong> Property-Based Tests</a></li></ol></li><li class="chapter-item expanded "><a href="../red-phase/verification-strategy.html"><strong aria-hidden="true">7.</strong> Verification Strategy</a></li><li class="chapter-item expanded affix "><li class="part-title">The GREEN Phase</li><li class="chapter-item expanded "><a href="../green-phase/minimal-implementation.html"><strong aria-hidden="true">8.</strong> Minimal Implementation</a></li><li class="chapter-item expanded "><a href="../green-phase/making-tests-pass.html"><strong aria-hidden="true">9.</strong> Making Tests Pass</a></li><li class="chapter-item expanded "><a href="../green-phase/avoiding-over-engineering.html"><strong aria-hidden="true">10.</strong> Avoiding Over-Engineering</a></li><li class="chapter-item expanded "><a href="../green-phase/simplest-thing.html"><strong aria-hidden="true">11.</strong> The Simplest Thing That Works</a></li><li class="chapter-item expanded affix "><li class="part-title">The REFACTOR Phase</li><li class="chapter-item expanded "><a href="../refactor-phase/refactoring-with-confidence.html"><strong aria-hidden="true">12.</strong> Refactoring with Confidence</a></li><li class="chapter-item expanded "><a href="../refactor-phase/code-quality.html"><strong aria-hidden="true">13.</strong> Code Quality Improvements</a></li><li class="chapter-item expanded "><a href="../refactor-phase/performance-optimization.html"><strong aria-hidden="true">14.</strong> Performance Optimization</a></li><li class="chapter-item expanded "><a href="../refactor-phase/documentation.html"><strong aria-hidden="true">15.</strong> Documentation</a></li><li class="chapter-item expanded affix "><li class="part-title">Advanced Testing</li><li class="chapter-item expanded "><a href="../advanced-testing/popperian-falsification.html"><strong aria-hidden="true">16.</strong> Popperian Falsification</a></li><li class="chapter-item expanded "><a href="../advanced-testing/property-based-testing.html"><strong aria-hidden="true">17.</strong> Property-Based Testing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced-testing/proptest-fundamentals.html"><strong aria-hidden="true">17.1.</strong> Proptest Fundamentals</a></li><li class="chapter-item expanded "><a href="../advanced-testing/strategies-generators.html"><strong aria-hidden="true">17.2.</strong> Strategies and Generators</a></li><li class="chapter-item expanded "><a href="../advanced-testing/testing-invariants.html"><strong aria-hidden="true">17.3.</strong> Testing Invariants</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced-testing/mutation-testing.html"><strong aria-hidden="true">18.</strong> Mutation Testing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced-testing/what-is-mutation-testing.html"><strong aria-hidden="true">18.1.</strong> What is Mutation Testing?</a></li><li class="chapter-item expanded "><a href="../advanced-testing/using-cargo-mutants.html"><strong aria-hidden="true">18.2.</strong> Using cargo-mutants</a></li><li class="chapter-item expanded "><a href="../advanced-testing/mutation-score-targets.html"><strong aria-hidden="true">18.3.</strong> Mutation Score Targets</a></li><li class="chapter-item expanded "><a href="../advanced-testing/killing-mutants.html"><strong aria-hidden="true">18.4.</strong> Killing Mutants</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced-testing/fuzzing.html"><strong aria-hidden="true">19.</strong> Fuzzing</a></li><li class="chapter-item expanded "><a href="../advanced-testing/benchmark-testing.html"><strong aria-hidden="true">20.</strong> Benchmark Testing</a></li><li class="chapter-item expanded affix "><li class="part-title">Quality Gates</li><li class="chapter-item expanded "><a href="../quality-gates/pre-commit-hooks.html"><strong aria-hidden="true">21.</strong> Pre-Commit Hooks</a></li><li class="chapter-item expanded "><a href="../quality-gates/continuous-integration.html"><strong aria-hidden="true">22.</strong> Continuous Integration</a></li><li class="chapter-item expanded "><a href="../quality-gates/code-formatting.html"><strong aria-hidden="true">23.</strong> Code Formatting (rustfmt)</a></li><li class="chapter-item expanded "><a href="../quality-gates/linting-clippy.html"><strong aria-hidden="true">24.</strong> Linting (clippy)</a></li><li class="chapter-item expanded "><a href="../quality-gates/coverage-measurement.html"><strong aria-hidden="true">25.</strong> Coverage Measurement</a></li><li class="chapter-item expanded "><a href="../quality-gates/complexity-analysis.html"><strong aria-hidden="true">26.</strong> Complexity Analysis</a></li><li class="chapter-item expanded "><a href="../quality-gates/tdg-score.html"><strong aria-hidden="true">27.</strong> Technical Debt Gradient (TDG)</a></li><li class="chapter-item expanded affix "><li class="part-title">Toyota Way Principles</li><li class="chapter-item expanded "><a href="../toyota-way/overview.html"><strong aria-hidden="true">28.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../toyota-way/kaizen.html"><strong aria-hidden="true">29.</strong> Kaizen (Continuous Improvement)</a></li><li class="chapter-item expanded "><a href="../toyota-way/genchi-genbutsu.html"><strong aria-hidden="true">30.</strong> Genchi Genbutsu (Go and See)</a></li><li class="chapter-item expanded "><a href="../toyota-way/jidoka.html"><strong aria-hidden="true">31.</strong> Jidoka (Built-in Quality)</a></li><li class="chapter-item expanded "><a href="../toyota-way/pdca-cycle.html"><strong aria-hidden="true">32.</strong> PDCA Cycle</a></li><li class="chapter-item expanded "><a href="../toyota-way/respect-for-people.html"><strong aria-hidden="true">33.</strong> Respect for People</a></li><li class="chapter-item expanded affix "><li class="part-title">Machine Learning Fundamentals</li><li class="chapter-item expanded "><a href="../ml-fundamentals/linear-regression.html"><strong aria-hidden="true">34.</strong> Linear Regression Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/regularization.html"><strong aria-hidden="true">35.</strong> Regularization Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/logistic-regression.html"><strong aria-hidden="true">36.</strong> Logistic Regression Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/knn.html"><strong aria-hidden="true">37.</strong> K-Nearest Neighbors (kNN) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/naive-bayes.html"><strong aria-hidden="true">38.</strong> Naive Bayes Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/bayesian-inference.html"><strong aria-hidden="true">39.</strong> Bayesian Inference Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/svm.html"><strong aria-hidden="true">40.</strong> Support Vector Machines (SVM) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/decision-trees.html"><strong aria-hidden="true">41.</strong> Decision Trees Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/ensemble-methods.html"><strong aria-hidden="true">42.</strong> Ensemble Methods Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/kmeans-clustering.html"><strong aria-hidden="true">43.</strong> K-Means Clustering Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/pca.html"><strong aria-hidden="true">44.</strong> Principal Component Analysis (PCA) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/tsne.html"><strong aria-hidden="true">45.</strong> t-SNE (t-Distributed Stochastic Neighbor Embedding) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/regression-metrics.html"><strong aria-hidden="true">46.</strong> Regression Metrics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/classification-metrics.html"><strong aria-hidden="true">47.</strong> Classification Metrics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/cross-validation.html"><strong aria-hidden="true">48.</strong> Cross-Validation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/gradient-descent.html"><strong aria-hidden="true">49.</strong> Gradient Descent Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/advanced-optimizers.html"><strong aria-hidden="true">50.</strong> Advanced Optimizers Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/metaheuristics.html"><strong aria-hidden="true">51.</strong> Metaheuristics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/automl.html"><strong aria-hidden="true">52.</strong> AutoML: Automated Machine Learning</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/compiler-in-the-loop.html"><strong aria-hidden="true">53.</strong> Compiler-in-the-Loop Learning</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/online-learning.html"><strong aria-hidden="true">54.</strong> Online Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/neuro-symbolic.html"><strong aria-hidden="true">55.</strong> Neuro-Symbolic Reasoning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/transfer-learning.html"><strong aria-hidden="true">56.</strong> Transfer Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/active-learning.html"><strong aria-hidden="true">57.</strong> Active Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/weak-supervision.html"><strong aria-hidden="true">58.</strong> Weak Supervision Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/automatic-differentiation.html"><strong aria-hidden="true">59.</strong> Automatic Differentiation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-neural-networks.html"><strong aria-hidden="true">60.</strong> Graph Neural Networks Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/neural-network-pruning.html"><strong aria-hidden="true">61.</strong> Neural Network Pruning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/lottery-ticket-hypothesis.html"><strong aria-hidden="true">62.</strong> Lottery Ticket Hypothesis Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/monte-carlo.html"><strong aria-hidden="true">63.</strong> Monte Carlo Simulation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/speech-voice-processing.html"><strong aria-hidden="true">64.</strong> Speech and Voice Processing Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/probability-calibration.html"><strong aria-hidden="true">65.</strong> Probability Calibration Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/chaos-engineering.html"><strong aria-hidden="true">66.</strong> Chaos Engineering for ML</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/webassembly-ml.html"><strong aria-hidden="true">67.</strong> WebAssembly for ML</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/feature-scaling.html"><strong aria-hidden="true">68.</strong> Feature Scaling Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/audio-processing.html"><strong aria-hidden="true">69.</strong> Audio Processing Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-algorithms.html"><strong aria-hidden="true">70.</strong> Graph Algorithms Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-pathfinding.html"><strong aria-hidden="true">71.</strong> Graph Pathfinding Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-components-traversal.html"><strong aria-hidden="true">72.</strong> Graph Components and Traversal</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-link-prediction.html"><strong aria-hidden="true">73.</strong> Graph Link Prediction and Community Detection</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/descriptive-statistics.html"><strong aria-hidden="true">74.</strong> Descriptive Statistics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/apriori.html"><strong aria-hidden="true">75.</strong> Apriori Algorithm Theory</a></li><li class="chapter-item expanded affix "><li class="part-title">Real-World Examples from Aprender</li><li class="chapter-item expanded "><a href="../examples/examples-reference.html"><strong aria-hidden="true">76.</strong> Examples Reference</a></li><li class="chapter-item expanded "><a href="../examples/linear-regression.html"><strong aria-hidden="true">77.</strong> Case Study: Linear Regression</a></li><li class="chapter-item expanded "><a href="../examples/boston-housing.html"><strong aria-hidden="true">78.</strong> Case Study: Boston Housing</a></li><li class="chapter-item expanded "><a href="../examples/cross-validation.html"><strong aria-hidden="true">79.</strong> Case Study: Cross-Validation</a></li><li class="chapter-item expanded "><a href="../examples/grid-search-tuning.html"><strong aria-hidden="true">80.</strong> Case Study: Grid Search Hyperparameter Tuning</a></li><li class="chapter-item expanded "><a href="../examples/automl-clustering.html"><strong aria-hidden="true">81.</strong> Case Study: AutoML Clustering (TPE)</a></li><li class="chapter-item expanded "><a href="../examples/random-forest.html"><strong aria-hidden="true">82.</strong> Case Study: Random Forest</a></li><li class="chapter-item expanded "><a href="../examples/random-forest-iris.html"><strong aria-hidden="true">83.</strong> Case Study: Random Forest Iris</a></li><li class="chapter-item expanded "><a href="../examples/random-forest-regression.html"><strong aria-hidden="true">84.</strong> Case Study: Random Forest Regression</a></li><li class="chapter-item expanded "><a href="../examples/decision-tree-iris.html"><strong aria-hidden="true">85.</strong> Case Study: Decision Tree Iris</a></li><li class="chapter-item expanded "><a href="../examples/decision-tree-regression.html"><strong aria-hidden="true">86.</strong> Case Study: Decision Tree Regression</a></li><li class="chapter-item expanded "><a href="../examples/model-serialization.html"><strong aria-hidden="true">87.</strong> Case Study: Model Serialization</a></li><li class="chapter-item expanded "><a href="../examples/model-format.html"><strong aria-hidden="true">88.</strong> Case Study: Model Format (.apr)</a></li><li class="chapter-item expanded "><a href="../examples/apr-format-deep-dive.html"><strong aria-hidden="true">89.</strong> The .apr Format: A Five Whys Deep Dive</a></li><li class="chapter-item expanded "><a href="../examples/model-bundling-paging.html"><strong aria-hidden="true">90.</strong> Case Study: Model Bundling and Memory Paging</a></li><li class="chapter-item expanded "><a href="../examples/tracing-memory-paging.html"><strong aria-hidden="true">91.</strong> Case Study: Tracing Memory Paging with Renacer</a></li><li class="chapter-item expanded "><a href="../examples/bundle-trace-demo.html"><strong aria-hidden="true">92.</strong> Case Study: Bundle Trace Demo</a></li><li class="chapter-item expanded "><a href="../examples/synthetic-data-generation.html"><strong aria-hidden="true">93.</strong> Case Study: Synthetic Data Generation</a></li><li class="chapter-item expanded "><a href="../examples/code-eda.html"><strong aria-hidden="true">94.</strong> Case Study: Code-Aware EDA</a></li><li class="chapter-item expanded "><a href="../examples/code-feature-extractor.html"><strong aria-hidden="true">95.</strong> Case Study: Code Feature Extraction</a></li><li class="chapter-item expanded "><a href="../examples/code-analysis.html"><strong aria-hidden="true">96.</strong> Case Study: Code Analysis with Code2Vec and MPNN</a></li><li class="chapter-item expanded "><a href="../examples/kmeans-clustering.html"><strong aria-hidden="true">97.</strong> Case Study: KMeans Clustering</a></li><li class="chapter-item expanded "><a href="../examples/dbscan-clustering.html"><strong aria-hidden="true">98.</strong> Case Study: DBSCAN Clustering</a></li><li class="chapter-item expanded "><a href="../examples/hierarchical-clustering.html"><strong aria-hidden="true">99.</strong> Case Study: Hierarchical Clustering</a></li><li class="chapter-item expanded "><a href="../examples/gmm-clustering.html"><strong aria-hidden="true">100.</strong> Case Study: GMM Clustering</a></li><li class="chapter-item expanded "><a href="../examples/iris-clustering.html"><strong aria-hidden="true">101.</strong> Case Study: Iris Clustering</a></li><li class="chapter-item expanded "><a href="../examples/logistic-regression.html"><strong aria-hidden="true">102.</strong> Case Study: Logistic Regression</a></li><li class="chapter-item expanded "><a href="../examples/knn-iris.html"><strong aria-hidden="true">103.</strong> Case Study: KNN Iris</a></li><li class="chapter-item expanded "><a href="../examples/naive-bayes-iris.html"><strong aria-hidden="true">104.</strong> Case Study: Naive Bayes Iris</a></li><li class="chapter-item expanded "><a href="../examples/beta-binomial-inference.html"><strong aria-hidden="true">105.</strong> Case Study: Beta-Binomial Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/gamma-poisson-inference.html"><strong aria-hidden="true">106.</strong> Case Study: Gamma-Poisson Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/normal-inverse-gamma-inference.html"><strong aria-hidden="true">107.</strong> Case Study: Normal-InverseGamma Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/dirichlet-multinomial-inference.html"><strong aria-hidden="true">108.</strong> Case Study: Dirichlet-Multinomial Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-linear-regression.html"><strong aria-hidden="true">109.</strong> Case Study: Bayesian Linear Regression</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-logistic-regression.html"><strong aria-hidden="true">110.</strong> Case Study: Bayesian Logistic Regression</a></li><li class="chapter-item expanded "><a href="../examples/negative-binomial-glm.html"><strong aria-hidden="true">111.</strong> Case Study: Negative Binomial GLM (Overdispersed Counts)</a></li><li class="chapter-item expanded "><a href="../examples/svm-iris.html"><strong aria-hidden="true">112.</strong> Case Study: SVM Iris</a></li><li class="chapter-item expanded "><a href="../examples/gbm-iris.html"><strong aria-hidden="true">113.</strong> Case Study: Gradient Boosting Iris</a></li><li class="chapter-item expanded "><a href="../examples/regularized-regression.html"><strong aria-hidden="true">114.</strong> Case Study: Regularized Regression</a></li><li class="chapter-item expanded "><a href="../examples/optimizer-demo.html"><strong aria-hidden="true">115.</strong> Case Study: Optimizer Demo</a></li><li class="chapter-item expanded "><a href="../examples/batch-optimization.html"><strong aria-hidden="true">116.</strong> Case Study: Batch Optimization</a></li><li class="chapter-item expanded "><a href="../examples/convex-optimization.html"><strong aria-hidden="true">117.</strong> Case Study: Convex Optimization (FISTA + Coordinate Descent)</a></li><li class="chapter-item expanded "><a href="../examples/constrained-optimization.html"><strong aria-hidden="true">118.</strong> Case Study: Constrained Optimization (Projected GD + Augmented Lagrangian + Interior Point)</a></li><li class="chapter-item expanded "><a href="../examples/admm-optimization.html"><strong aria-hidden="true">119.</strong> Case Study: ADMM Optimization (Distributed ML + Federated Learning)</a></li><li class="chapter-item expanded "><a href="../examples/differential-evolution.html"><strong aria-hidden="true">120.</strong> Case Study: Differential Evolution (Metaheuristics)</a></li><li class="chapter-item expanded "><a href="../examples/metaheuristics-optimization.html"><strong aria-hidden="true">121.</strong> Case Study: Metaheuristics Optimization</a></li><li class="chapter-item expanded "><a href="../examples/aco-tsp.html"><strong aria-hidden="true">122.</strong> Case Study: Ant Colony Optimization (TSP)</a></li><li class="chapter-item expanded "><a href="../examples/tabu-tsp.html"><strong aria-hidden="true">123.</strong> Case Study: Tabu Search (TSP)</a></li><li class="chapter-item expanded "><a href="../examples/tsp-solver-crate.html"><strong aria-hidden="true">124.</strong> Case Study: aprender-tsp Sub-Crate</a></li><li class="chapter-item expanded "><a href="../examples/predator-prey-optimization.html"><strong aria-hidden="true">125.</strong> Case Study: Predator-Prey Optimization</a></li><li class="chapter-item expanded "><a href="../examples/dataframe-basics.html"><strong aria-hidden="true">126.</strong> Case Study: DataFrame Basics</a></li><li class="chapter-item expanded "><a href="../examples/data-preprocessing-scalers.html"><strong aria-hidden="true">127.</strong> Case Study: Data Preprocessing with Scalers</a></li><li class="chapter-item expanded "><a href="../examples/graph-social-network.html"><strong aria-hidden="true">128.</strong> Case Study: Graph Social Network</a></li><li class="chapter-item expanded "><a href="../examples/community-detection.html"><strong aria-hidden="true">129.</strong> Case Study: Community Detection with Louvain</a></li><li class="chapter-item expanded "><a href="../examples/graph-algorithms-comprehensive.html"><strong aria-hidden="true">130.</strong> Case Study: Comprehensive Graph Algorithms</a></li><li class="chapter-item expanded "><a href="../examples/descriptive-statistics.html"><strong aria-hidden="true">131.</strong> Case Study: Descriptive Statistics</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-blocks-histogram.html"><strong aria-hidden="true">132.</strong> Case Study: Bayesian Blocks Histogram</a></li><li class="chapter-item expanded "><a href="../examples/pca-iris.html"><strong aria-hidden="true">133.</strong> Case Study: PCA Iris</a></li><li class="chapter-item expanded "><a href="../examples/isolation-forest-anomaly.html"><strong aria-hidden="true">134.</strong> Case Study: Isolation Forest Anomaly Detection</a></li><li class="chapter-item expanded "><a href="../examples/lof-anomaly.html"><strong aria-hidden="true">135.</strong> Case Study: Local Outlier Factor (LOF)</a></li><li class="chapter-item expanded "><a href="../examples/spectral-clustering.html"><strong aria-hidden="true">136.</strong> Case Study: Spectral Clustering</a></li><li class="chapter-item expanded "><a href="../examples/tsne-visualization.html"><strong aria-hidden="true">137.</strong> Case Study: t-SNE Visualization</a></li><li class="chapter-item expanded "><a href="../examples/market-basket-apriori.html"><strong aria-hidden="true">138.</strong> Case Study: Market Basket Analysis (Apriori)</a></li><li class="chapter-item expanded "><a href="../examples/time-series-forecasting.html"><strong aria-hidden="true">139.</strong> Case Study: ARIMA Time Series Forecasting</a></li><li class="chapter-item expanded "><a href="../examples/text-preprocessing.html"><strong aria-hidden="true">140.</strong> Case Study: Text Preprocessing for NLP</a></li><li class="chapter-item expanded "><a href="../examples/text-classification.html"><strong aria-hidden="true">141.</strong> Case Study: Text Classification with TF-IDF</a></li><li class="chapter-item expanded "><a href="../examples/chat-template.html"><strong aria-hidden="true">142.</strong> Case Study: Chat Templates for LLM Inference</a></li><li class="chapter-item expanded "><a href="../examples/advanced-nlp.html"><strong aria-hidden="true">143.</strong> Case Study: Advanced NLP (Similarity, Entities, Summarization)</a></li><li class="chapter-item expanded "><a href="../examples/xor-neural-network.html"><strong aria-hidden="true">144.</strong> Case Study: XOR Neural Network (Deep Learning)</a></li><li class="chapter-item expanded "><a href="../examples/xor-training.html"><strong aria-hidden="true">145.</strong> Case Study: XOR Training</a></li><li class="chapter-item expanded "><a href="../examples/neural-network-training.html"><strong aria-hidden="true">146.</strong> Case Study: Neural Network Training Pipeline</a></li><li class="chapter-item expanded "><a href="../examples/classification-training.html"><strong aria-hidden="true">147.</strong> Case Study: Classification Training</a></li><li class="chapter-item expanded "><a href="../examples/nlp-advanced.html"><strong aria-hidden="true">148.</strong> Case Study: Advanced NLP</a></li><li class="chapter-item expanded "><a href="../examples/topic-sentiment-analysis.html"><strong aria-hidden="true">149.</strong> Case Study: Topic & Sentiment Analysis</a></li><li class="chapter-item expanded "><a href="../examples/recommend-content.html"><strong aria-hidden="true">150.</strong> Case Study: Content-Based Recommendations</a></li><li class="chapter-item expanded "><a href="../examples/content-recommender.html"><strong aria-hidden="true">151.</strong> Case Study: Content-Based Recommender System</a></li><li class="chapter-item expanded "><a href="../examples/shell-completion.html"><strong aria-hidden="true">152.</strong> Case Study: AI Shell Completion</a></li><li class="chapter-item expanded "><a href="../examples/shell-completion-benchmarks.html"><strong aria-hidden="true">153.</strong> Case Study: Shell Completion Benchmarks</a></li><li class="chapter-item expanded "><a href="../examples/shell-hf-hub-publishing.html"><strong aria-hidden="true">154.</strong> Case Study: Publishing Shell Models to HF Hub</a></li><li class="chapter-item expanded "><a href="../examples/shell-encryption-tiers.html"><strong aria-hidden="true">155.</strong> Case Study: Model Encryption Tiers</a></li><li class="chapter-item expanded "><a href="../examples/shell-encryption-demo.html"><strong aria-hidden="true">156.</strong> Case Study: Shell Encryption Demo</a></li><li class="chapter-item expanded "><a href="../examples/shell-homomorphic-encryption.html"><strong aria-hidden="true">157.</strong> Case Study: Shell Homomorphic Encryption</a></li><li class="chapter-item expanded "><a href="../examples/shell-model-format.html"><strong aria-hidden="true">158.</strong> Case Study: Shell Model Format</a></li><li class="chapter-item expanded "><a href="../examples/mixture-of-experts.html"><strong aria-hidden="true">159.</strong> Case Study: Mixture of Experts (MoE)</a></li><li class="chapter-item expanded "><a href="../examples/shell-history-developer-guide.html"><strong aria-hidden="true">160.</strong> Developer's Guide: Shell History Models</a></li><li class="chapter-item expanded "><a href="../examples/custom-error-classifier.html"><strong aria-hidden="true">161.</strong> Building Custom Error Classifiers</a></li><li class="chapter-item expanded "><a href="../examples/citl-automated-repair.html"><strong aria-hidden="true">162.</strong> Case Study: CITL Automated Program Repair</a></li><li class="chapter-item expanded "><a href="../examples/batuta-integration.html"><strong aria-hidden="true">163.</strong> Case Study: Batuta - Automated Migration to Aprender</a></li><li class="chapter-item expanded "><a href="../examples/online-learning.html"><strong aria-hidden="true">164.</strong> Case Study: Online Learning and Dynamic Retraining</a></li><li class="chapter-item expanded "><a href="../examples/apr-loading-modes.html"><strong aria-hidden="true">165.</strong> Case Study: APR Loading Modes</a></li><li class="chapter-item expanded "><a href="../examples/apr-inspection.html"><strong aria-hidden="true">166.</strong> Case Study: APR Model Inspection</a></li><li class="chapter-item expanded "><a href="../examples/apr-scoring.html"><strong aria-hidden="true">167.</strong> Case Study: APR 100-Point Quality Scoring</a></li><li class="chapter-item expanded "><a href="../examples/poka-yoke-validation.html"><strong aria-hidden="true">168.</strong> Case Study: APR Poka-Yoke Validation</a></li><li class="chapter-item expanded "><a href="../examples/apr-cache.html"><strong aria-hidden="true">169.</strong> Case Study: APR Model Cache</a></li><li class="chapter-item expanded "><a href="../examples/apr-embed.html"><strong aria-hidden="true">170.</strong> Case Study: APR Data Embedding</a></li><li class="chapter-item expanded "><a href="../examples/apr-with-metadata.html"><strong aria-hidden="true">171.</strong> Case Study: APR with JSON Metadata</a></li><li class="chapter-item expanded "><a href="../examples/cuda-backend.html"><strong aria-hidden="true">172.</strong> Case Study: CUDA and GPU Backends</a></li><li class="chapter-item expanded "><a href="../examples/trueno-compute-integration.html"><strong aria-hidden="true">173.</strong> Case Study: Trueno Compute Integration</a></li><li class="chapter-item expanded "><a href="../examples/apr-cli-demo.html"><strong aria-hidden="true">174.</strong> Case Study: APR CLI Tool Demo</a></li><li class="chapter-item expanded "><a href="../examples/create-test-apr.html"><strong aria-hidden="true">175.</strong> Case Study: Create Test APR Files</a></li><li class="chapter-item expanded "><a href="../examples/apr-cli-commands.html"><strong aria-hidden="true">176.</strong> Case Study: APR CLI Commands Demo</a></li><li class="chapter-item expanded "><a href="../examples/model-zoo.html"><strong aria-hidden="true">177.</strong> Case Study: Model Zoo</a></li><li class="chapter-item expanded "><a href="../examples/sovereign-stack.html"><strong aria-hidden="true">178.</strong> Case Study: Sovereign AI Stack Integration</a></li><li class="chapter-item expanded "><a href="../examples/sovereign-offline.html"><strong aria-hidden="true">179.</strong> Case Study: Sovereign AI Offline Mode</a></li><li class="chapter-item expanded "><a href="../examples/explainability-audit.html"><strong aria-hidden="true">180.</strong> Case Study: Model Explainability and Audit Trails</a></li><li class="chapter-item expanded "><a href="../examples/model-serving.html"><strong aria-hidden="true">181.</strong> Case Study: Model Serving</a></li><li class="chapter-item expanded "><a href="../examples/federation-gateway.html"><strong aria-hidden="true">182.</strong> Case Study: Federation Gateway</a></li><li class="chapter-item expanded "><a href="../examples/federation-routing.html"><strong aria-hidden="true">183.</strong> Case Study: Federation Routing Policies</a></li><li class="chapter-item expanded "><a href="../examples/probar-tui-testing.html"><strong aria-hidden="true">184.</strong> Case Study: Probar TUI Testing</a></li><li class="chapter-item expanded "><a href="../examples/pipeline-verification.html"><strong aria-hidden="true">185.</strong> Case Study: Pipeline Verification</a></li><li class="chapter-item expanded "><a href="../examples/state-machine-playbooks.html"><strong aria-hidden="true">186.</strong> Case Study: State Machine Playbooks</a></li><li class="chapter-item expanded "><a href="../examples/tensorlogic-reasoning.html"><strong aria-hidden="true">187.</strong> Case Study: TensorLogic Neuro-Symbolic Reasoning</a></li><li class="chapter-item expanded "><a href="../examples/audio-mel-spectrogram.html"><strong aria-hidden="true">188.</strong> Case Study: Audio Mel Spectrogram Processing</a></li><li class="chapter-item expanded "><a href="../examples/monte-carlo-simulation.html"><strong aria-hidden="true">189.</strong> Case Study: Monte Carlo Financial Simulation</a></li><li class="chapter-item expanded "><a href="../examples/autograd-training.html"><strong aria-hidden="true">190.</strong> Case Study: Automatic Differentiation Training</a></li><li class="chapter-item expanded "><a href="../examples/gnn-node-classification.html"><strong aria-hidden="true">191.</strong> Case Study: Graph Neural Networks</a></li><li class="chapter-item expanded "><a href="../examples/pruning-magnitude.html"><strong aria-hidden="true">192.</strong> Case Study: Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../examples/lottery-ticket-pruning.html"><strong aria-hidden="true">193.</strong> Case Study: Lottery Ticket Pruning</a></li><li class="chapter-item expanded "><a href="../examples/bench-comparison.html"><strong aria-hidden="true">194.</strong> Case Study: Benchmark Comparison</a></li><li class="chapter-item expanded "><a href="../examples/showcase-benchmark.html"><strong aria-hidden="true">195.</strong> Case Study: Showcase Benchmark</a></li><li class="chapter-item expanded "><a href="../examples/qa-falsification.html"><strong aria-hidden="true">196.</strong> Case Study: QA Falsification Protocol</a></li><li class="chapter-item expanded "><a href="../examples/qwen-qa-playbook.html"><strong aria-hidden="true">197.</strong> Case Study: Qwen2.5-Coder QA Playbook</a></li><li class="chapter-item expanded "><a href="../examples/ptx-parity-validation.html"><strong aria-hidden="true">198.</strong> Case Study: PTX Parity Validation (GH-219)</a></li><li class="chapter-item expanded "><a href="../examples/hex-forensics.html"><strong aria-hidden="true">199.</strong> Case Study: Hex Forensics — Binary Model Inspection</a></li><li class="chapter-item expanded "><a href="../examples/rosetta-stone.html"><strong aria-hidden="true">200.</strong> Case Study: Rosetta Stone — Universal Format Converter</a></li><li class="chapter-item expanded "><a href="../examples/validated-tensors.html"><strong aria-hidden="true">201.</strong> Case Study: Validated Tensors — Compile-Time Contracts</a></li><li class="chapter-item expanded "><a href="../examples/qwen-inference.html"><strong aria-hidden="true">202.</strong> Case Study: Qwen Inference with realizar</a></li><li class="chapter-item expanded "><a href="../examples/sharded-safetensors-serve.html"><strong aria-hidden="true">203.</strong> Case Study: Sharded SafeTensors Serving (GH-213)</a></li><li class="chapter-item expanded "><a href="../examples/model-merge-strategies.html"><strong aria-hidden="true">204.</strong> Case Study: Model Merge Strategies (GH-245)</a></li><li class="chapter-item expanded affix "><li class="part-title">Sprint-Based Development</li><li class="chapter-item expanded "><a href="../sprints/sprint-planning.html"><strong aria-hidden="true">205.</strong> Sprint Planning</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-execution.html"><strong aria-hidden="true">206.</strong> Sprint Execution</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-review.html"><strong aria-hidden="true">207.</strong> Sprint Review</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-retrospective.html"><strong aria-hidden="true">208.</strong> Sprint Retrospective</a></li><li class="chapter-item expanded "><a href="../sprints/issue-management.html"><strong aria-hidden="true">209.</strong> Issue Management</a></li><li class="chapter-item expanded affix "><li class="part-title">Anti-Hallucination Enforcement</li><li class="chapter-item expanded "><a href="../anti-hallucination/test-backed-examples.html"><strong aria-hidden="true">210.</strong> Test-Backed Examples</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/example-verification.html"><strong aria-hidden="true">211.</strong> Example Verification</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/ci-validation.html"><strong aria-hidden="true">212.</strong> CI Validation</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/documentation-testing.html"><strong aria-hidden="true">213.</strong> Documentation Testing</a></li><li class="chapter-item expanded affix "><li class="part-title">Tools and Setup</li><li class="chapter-item expanded "><a href="../tools/development-environment.html"><strong aria-hidden="true">214.</strong> Development Environment</a></li><li class="chapter-item expanded "><a href="../tools/cargo-test.html"><strong aria-hidden="true">215.</strong> cargo test</a></li><li class="chapter-item expanded "><a href="../tools/cargo-clippy.html"><strong aria-hidden="true">216.</strong> cargo clippy</a></li><li class="chapter-item expanded "><a href="../tools/cargo-fmt.html"><strong aria-hidden="true">217.</strong> cargo fmt</a></li><li class="chapter-item expanded "><a href="../tools/cargo-mutants.html"><strong aria-hidden="true">218.</strong> cargo mutants</a></li><li class="chapter-item expanded "><a href="../tools/proptest.html"><strong aria-hidden="true">219.</strong> proptest</a></li><li class="chapter-item expanded "><a href="../tools/criterion.html"><strong aria-hidden="true">220.</strong> criterion</a></li><li class="chapter-item expanded "><a href="../tools/pmat.html"><strong aria-hidden="true">221.</strong> pmat (Toyota AI Toolkit)</a></li><li class="chapter-item expanded "><a href="../tools/apr-cli.html" class="active"><strong aria-hidden="true">222.</strong> apr (APR Model Operations CLI)</a></li><li class="chapter-item expanded "><a href="../tools/apr-spec.html"><strong aria-hidden="true">223.</strong> APR Format Specification</a></li><li class="chapter-item expanded affix "><li class="part-title">Best Practices</li><li class="chapter-item expanded "><a href="../best-practices/error-handling.html"><strong aria-hidden="true">224.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../best-practices/api-design.html"><strong aria-hidden="true">225.</strong> API Design</a></li><li class="chapter-item expanded "><a href="../best-practices/builder-pattern.html"><strong aria-hidden="true">226.</strong> Builder Pattern</a></li><li class="chapter-item expanded "><a href="../best-practices/type-safety.html"><strong aria-hidden="true">227.</strong> Type Safety</a></li><li class="chapter-item expanded "><a href="../best-practices/performance.html"><strong aria-hidden="true">228.</strong> Performance Considerations</a></li><li class="chapter-item expanded "><a href="../best-practices/documentation-standards.html"><strong aria-hidden="true">229.</strong> Documentation Standards</a></li><li class="chapter-item expanded affix "><li class="part-title">Metrics and Measurement</li><li class="chapter-item expanded "><a href="../metrics/test-coverage.html"><strong aria-hidden="true">230.</strong> Test Coverage</a></li><li class="chapter-item expanded "><a href="../metrics/mutation-score.html"><strong aria-hidden="true">231.</strong> Mutation Score</a></li><li class="chapter-item expanded "><a href="../metrics/cyclomatic-complexity.html"><strong aria-hidden="true">232.</strong> Cyclomatic Complexity</a></li><li class="chapter-item expanded "><a href="../metrics/code-churn.html"><strong aria-hidden="true">233.</strong> Code Churn</a></li><li class="chapter-item expanded "><a href="../metrics/build-times.html"><strong aria-hidden="true">234.</strong> Build Times</a></li><li class="chapter-item expanded "><a href="../metrics/tdg-breakdown.html"><strong aria-hidden="true">235.</strong> TDG Score Breakdown</a></li><li class="chapter-item expanded affix "><li class="part-title">Common Pitfalls</li><li class="chapter-item expanded "><a href="../pitfalls/skipping-tests.html"><strong aria-hidden="true">236.</strong> Skipping Tests</a></li><li class="chapter-item expanded "><a href="../pitfalls/insufficient-coverage.html"><strong aria-hidden="true">237.</strong> Insufficient Test Coverage</a></li><li class="chapter-item expanded "><a href="../pitfalls/ignoring-warnings.html"><strong aria-hidden="true">238.</strong> Ignoring Warnings</a></li><li class="chapter-item expanded "><a href="../pitfalls/over-mocking.html"><strong aria-hidden="true">239.</strong> Over-Mocking</a></li><li class="chapter-item expanded "><a href="../pitfalls/flaky-tests.html"><strong aria-hidden="true">240.</strong> Flaky Tests</a></li><li class="chapter-item expanded "><a href="../pitfalls/technical-debt.html"><strong aria-hidden="true">241.</strong> Technical Debt Accumulation</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../appendix/glossary.html"><strong aria-hidden="true">242.</strong> Glossary</a></li><li class="chapter-item expanded "><a href="../appendix/references.html"><strong aria-hidden="true">243.</strong> References</a></li><li class="chapter-item expanded "><a href="../appendix/further-reading.html"><strong aria-hidden="true">244.</strong> Further Reading</a></li><li class="chapter-item expanded "><a href="../appendix/contributing.html"><strong aria-hidden="true">245.</strong> Contributing to This Book</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">EXTREME TDD - The Aprender Guide to Zero-Defect Machine Learning</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/aprender" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/aprender/edit/main/book/src/tools/apr-cli.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="apr---apr-model-operations-cli"><a class="header" href="#apr---apr-model-operations-cli">apr - APR Model Operations CLI</a></h1>
+<p>The <code>apr</code> command-line tool provides inspection, debugging, validation, and comparison capabilities for <code>.apr</code> model files. It follows Toyota Way principles for quality and visibility.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash">cargo install --path crates/apr-cli
+</code></pre>
+<p>Or build from the workspace:</p>
+<pre><code class="language-bash">cargo build --release -p apr-cli
+</code></pre>
+<p>The binary will be available at <code>target/release/apr</code>.</p>
+<h2 id="commands-overview"><a class="header" href="#commands-overview">Commands Overview</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th><th>Toyota Way Principle</th></tr></thead><tbody>
+<tr><td><code>run</code></td><td>Run model directly (auto-download, cache, execute)</td><td>Just-in-Time Production</td></tr>
+<tr><td><code>serve</code></td><td>Start inference server with GPU acceleration</td><td>Just-in-Time Production</td></tr>
+<tr><td><code>chat</code></td><td>Interactive chat with language models</td><td>Genchi Genbutsu (Go and See)</td></tr>
+<tr><td><code>inspect</code></td><td>View model metadata and structure</td><td>Genchi Genbutsu (Go and See)</td></tr>
+<tr><td><code>debug</code></td><td>Debug output with optional drama mode</td><td>Visualization</td></tr>
+<tr><td><code>validate</code></td><td>Validate integrity with quality scoring</td><td>Jidoka (Built-in Quality)</td></tr>
+<tr><td><code>diff</code></td><td>Compare two models</td><td>Kaizen (Continuous Improvement)</td></tr>
+<tr><td><code>tensors</code></td><td>List tensor names, shapes, and statistics</td><td>Genchi Genbutsu (Go to the Source)</td></tr>
+<tr><td><code>trace</code></td><td>Layer-by-layer analysis with anomaly detection</td><td>Visualization</td></tr>
+<tr><td><code>lint</code></td><td>Check for best practices and conventions</td><td>Jidoka (Built-in Quality)</td></tr>
+<tr><td><code>probar</code></td><td>Export for visual regression testing</td><td>Standardization</td></tr>
+<tr><td><code>import</code></td><td>Import from HuggingFace, local files, or URLs</td><td>Automation</td></tr>
+<tr><td><code>export</code></td><td>Export to SafeTensors, GGUF formats</td><td>Automation</td></tr>
+<tr><td><code>pull</code></td><td>Download and cache model (Ollama-style UX)</td><td>Automation</td></tr>
+<tr><td><code>list</code></td><td>List cached models</td><td>Visibility</td></tr>
+<tr><td><code>rm</code></td><td>Remove model from cache</td><td>Standardization</td></tr>
+<tr><td><code>convert</code></td><td>Quantization (int8, int4, fp16) and optimization</td><td>Kaizen</td></tr>
+<tr><td><code>merge</code></td><td>Merge models (average, weighted strategies)</td><td>Kaizen</td></tr>
+<tr><td><code>tree</code></td><td>Model architecture tree view</td><td>Visualization</td></tr>
+<tr><td><code>hex</code></td><td>Hex dump tensor data</td><td>Genchi Genbutsu</td></tr>
+<tr><td><code>flow</code></td><td>Data flow visualization</td><td>Visualization</td></tr>
+<tr><td><code>bench</code></td><td>Benchmark throughput (spec H12: &gt;= 10 tok/s)</td><td>Measurement</td></tr>
+<tr><td><code>eval</code></td><td>Evaluate model perplexity (spec H13: PPL &lt;= 20)</td><td>Measurement</td></tr>
+<tr><td><code>profile</code></td><td>Deep profiling with Roofline analysis</td><td>Genchi Genbutsu</td></tr>
+<tr><td><code>qa</code></td><td>Falsifiable QA checklist for model releases</td><td>Jidoka</td></tr>
+<tr><td><code>qualify</code></td><td>Cross-subcommand smoke test (does every tool handle this model?)</td><td>Jidoka</td></tr>
+<tr><td><code>showcase</code></td><td>Qwen2.5-Coder showcase demo</td><td>Standardization</td></tr>
+<tr><td><code>check</code></td><td>Model self-test: 10-stage pipeline integrity</td><td>Jidoka</td></tr>
+<tr><td><code>publish</code></td><td>Publish model to HuggingFace Hub</td><td>Automation</td></tr>
+<tr><td><code>cbtop</code></td><td>ComputeBrick pipeline monitor</td><td>Visualization</td></tr>
+<tr><td><code>compare-hf</code></td><td>Compare local model (APR/GGUF/SafeTensors) against HuggingFace</td><td>Jidoka</td></tr>
+<tr><td><code>explain</code></td><td>Explain errors, architecture, and tensors</td><td>Knowledge Sharing</td></tr>
+<tr><td><code>tui</code></td><td>Interactive terminal UI</td><td>Visualization</td></tr>
+<tr><td><code>canary</code></td><td>Regression testing via tensor statistics</td><td>Jidoka</td></tr>
+</tbody></table>
+</div>
+<h2 id="serve-command"><a class="header" href="#serve-command">Serve Command</a></h2>
+<p>Start an OpenAI-compatible inference server with optional GPU acceleration.</p>
+<pre><code class="language-bash"># Basic server (CPU)
+apr serve model.gguf --port 8080
+
+# GPU-accelerated server
+apr serve model.gguf --port 8080 --gpu
+
+# Batched GPU mode (2.9x faster than Ollama)
+apr serve model.gguf --port 8080 --gpu --batch
+</code></pre>
+<h3 id="performance"><a class="header" href="#performance">Performance</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Mode</th><th>Throughput</th><th>vs Ollama</th><th>Memory</th></tr></thead><tbody>
+<tr><td>CPU (baseline)</td><td>~15 tok/s</td><td>0.05x</td><td>1.1 GB</td></tr>
+<tr><td>GPU (single)</td><td>~83 tok/s</td><td>0.25x</td><td>1.5 GB</td></tr>
+<tr><td>GPU (batched)</td><td>~850 tok/s</td><td>2.9x</td><td>1.9 GB</td></tr>
+<tr><td>Ollama</td><td>~333 tok/s</td><td>1.0x</td><td>-</td></tr>
+</tbody></table>
+</div>
+<h3 id="endpoints"><a class="header" href="#endpoints">Endpoints</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/health</code></td><td>GET</td><td>Health check</td></tr>
+<tr><td><code>/metrics</code></td><td>GET</td><td>Prometheus metrics</td></tr>
+<tr><td><code>/v1/chat/completions</code></td><td>POST</td><td>OpenAI-compatible chat</td></tr>
+<tr><td><code>/v1/completions</code></td><td>POST</td><td>OpenAI-compatible completions</td></tr>
+<tr><td><code>/generate</code></td><td>POST</td><td>Native generation endpoint</td></tr>
+</tbody></table>
+</div>
+<h3 id="example-request"><a class="header" href="#example-request">Example Request</a></h3>
+<pre><code class="language-bash">curl -X POST http://localhost:8080/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;model&quot;: &quot;default&quot;,
+    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello!&quot;}],
+    &quot;max_tokens&quot;: 50
+  }'
+</code></pre>
+<h3 id="tracing-headers"><a class="header" href="#tracing-headers">Tracing Headers</a></h3>
+<p>Use the <code>X-Trace-Level</code> header for performance debugging:</p>
+<pre><code class="language-bash"># Token-level timing
+curl -H &quot;X-Trace-Level: brick&quot; http://localhost:8080/v1/chat/completions ...
+
+# Layer-level timing
+curl -H &quot;X-Trace-Level: layer&quot; http://localhost:8080/v1/chat/completions ...
+</code></pre>
+<h3 id="tool-calling-gh-160"><a class="header" href="#tool-calling-gh-160">Tool Calling (GH-160)</a></h3>
+<p>The server supports OpenAI-compatible tool calling, allowing models to invoke external functions.</p>
+<p><strong>Define tools in your request:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8080/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;model&quot;: &quot;default&quot;,
+    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is the weather in Tokyo?&quot;}],
+    &quot;tools&quot;: [
+      {
+        &quot;type&quot;: &quot;function&quot;,
+        &quot;function&quot;: {
+          &quot;name&quot;: &quot;get_weather&quot;,
+          &quot;description&quot;: &quot;Get the current weather for a location&quot;,
+          &quot;parameters&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {
+              &quot;location&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;City name&quot;},
+              &quot;unit&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;celsius&quot;, &quot;fahrenheit&quot;]}
+            },
+            &quot;required&quot;: [&quot;location&quot;]
+          }
+        }
+      }
+    ],
+    &quot;max_tokens&quot;: 100
+  }'
+</code></pre>
+<p><strong>Response with tool call:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;chatcmpl-abc123&quot;,
+  &quot;choices&quot;: [{
+    &quot;message&quot;: {
+      &quot;role&quot;: &quot;assistant&quot;,
+      &quot;content&quot;: null,
+      &quot;tool_calls&quot;: [{
+        &quot;id&quot;: &quot;call_xyz789&quot;,
+        &quot;type&quot;: &quot;function&quot;,
+        &quot;function&quot;: {
+          &quot;name&quot;: &quot;get_weather&quot;,
+          &quot;arguments&quot;: &quot;{\&quot;location\&quot;: \&quot;Tokyo\&quot;, \&quot;unit\&quot;: \&quot;celsius\&quot;}&quot;
+        }
+      }]
+    },
+    &quot;finish_reason&quot;: &quot;tool_calls&quot;
+  }]
+}
+</code></pre>
+<p><strong>Multi-turn with tool result:</strong></p>
+<p>After executing the tool, send the result back:</p>
+<pre><code class="language-bash">curl -X POST http://localhost:8080/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;model&quot;: &quot;default&quot;,
+    &quot;messages&quot;: [
+      {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is the weather in Tokyo?&quot;},
+      {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: null, &quot;tool_calls&quot;: [{&quot;id&quot;: &quot;call_xyz789&quot;, &quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;get_weather&quot;, &quot;arguments&quot;: &quot;{\&quot;location\&quot;: \&quot;Tokyo\&quot;}&quot;}}]},
+      {&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: &quot;call_xyz789&quot;, &quot;content&quot;: &quot;{\&quot;temperature\&quot;: 22, \&quot;condition\&quot;: \&quot;sunny\&quot;}&quot;}
+    ],
+    &quot;max_tokens&quot;: 100
+  }'
+</code></pre>
+<p>The model will then generate a response incorporating the tool result.</p>
+<p><strong>Tool choice control:</strong></p>
+<pre><code class="language-json">{
+  &quot;tool_choice&quot;: &quot;auto&quot;
+}
+</code></pre>
+<p>Options: <code>&quot;auto&quot;</code> (default), <code>&quot;none&quot;</code> (disable tools), or <code>{&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;specific_tool&quot;}}</code>.</p>
+<p><strong>Example code:</strong> See <code>cargo run --example tool_calling_demo</code> for a complete Rust example.</p>
+<h2 id="chat-command"><a class="header" href="#chat-command">Chat Command</a></h2>
+<p>Interactive chat with language models (supports GGUF, APR, SafeTensors).</p>
+<pre><code class="language-bash"># Interactive chat (GPU by default)
+apr chat model.gguf
+
+# Force CPU inference
+apr chat model.gguf --no-gpu
+
+# Adjust generation parameters
+apr chat model.gguf --temperature 0.7 --top-p 0.9 --max-tokens 512
+</code></pre>
+<h2 id="inspect-command"><a class="header" href="#inspect-command">Inspect Command</a></h2>
+<p>View model metadata, structure, and flags without loading the full payload.</p>
+<pre><code class="language-bash"># Basic inspection
+apr inspect model.apr
+
+# JSON output for automation
+apr inspect model.apr --json
+
+# Show vocabulary details
+apr inspect model.apr --vocab
+
+# Show filter/security details
+apr inspect model.apr --filters
+
+# Show weight statistics
+apr inspect model.apr --weights
+</code></pre>
+<h3 id="example-output"><a class="header" href="#example-output">Example Output</a></h3>
+<pre><code>=== model.apr ===
+
+  Type: LinearRegression
+  Version: 1.0
+  Size: 2.5 KiB
+  Compressed: 1.2 KiB (ratio: 2.08x)
+  Flags: COMPRESSED | SIGNED
+  Created: 2025-01-15T10:30:00Z
+  Framework: aprender 0.18.2
+  Name: Boston Housing Predictor
+  Description: Linear regression model for house price prediction
+</code></pre>
+<h2 id="debug-command"><a class="header" href="#debug-command">Debug Command</a></h2>
+<p>Simple debugging with optional theatrical &quot;drama&quot; mode.</p>
+<pre><code class="language-bash"># Basic debug output
+apr debug model.apr
+
+# Drama mode - theatrical output (inspired by whisper.apr)
+apr debug model.apr --drama
+
+# Hex dump of file bytes
+apr debug model.apr --hex
+
+# Extract ASCII strings
+apr debug model.apr --strings
+
+# Limit output lines
+apr debug model.apr --hex --limit 512
+</code></pre>
+<h3 id="drama-mode-output"><a class="header" href="#drama-mode-output">Drama Mode Output</a></h3>
+<pre><code>====[ DRAMA: model.apr ]====
+
+ACT I: THE HEADER
+  Scene 1: Magic bytes... APRN (applause!)
+  Scene 2: Version check... 1.0 (standing ovation!)
+  Scene 3: Model type... LinearRegression (the protagonist!)
+
+ACT II: THE METADATA
+  Scene 1: File size... 2.5 KiB
+  Scene 2: Flags... COMPRESSED | SIGNED
+
+ACT III: THE VERDICT
+  CURTAIN CALL: Model is READY!
+
+====[ END DRAMA ]====
+</code></pre>
+<h2 id="validate-command"><a class="header" href="#validate-command">Validate Command</a></h2>
+<p>Validate model integrity with optional 100-point quality assessment.</p>
+<pre><code class="language-bash"># Basic validation
+apr validate model.apr
+
+# With 100-point quality scoring
+apr validate model.apr --quality
+
+# Strict mode (fail on warnings)
+apr validate model.apr --strict
+</code></pre>
+<h3 id="quality-assessment-output"><a class="header" href="#quality-assessment-output">Quality Assessment Output</a></h3>
+<pre><code>Validating model.apr...
+
+[PASS] Header complete (32 bytes)
+[PASS] Magic bytes: APRN
+[PASS] Version: 1.0 (supported)
+[PASS] Digital signature present
+[PASS] Metadata readable
+
+Result: VALID (with 0 warnings)
+
+=== 100-Point Quality Assessment ===
+
+Structure: 25/25
+  - Header valid:        5/5
+  - Metadata complete:   5/5
+  - Checksum valid:      5/5
+  - Magic valid:         5/5
+  - Version supported:   5/5
+
+Security: 25/25
+  - No pickle code:      5/5
+  - No eval/exec:        5/5
+  - Signed:              5/5
+  - Safe format:         5/5
+  - Safe tensors:        5/5
+
+Weights: 25/25
+  - No NaN values:       5/5
+  - No Inf values:       5/5
+  - Reasonable range:    5/5
+  - Low sparsity:        5/5
+  - Healthy distribution: 5/5
+
+Metadata: 25/25
+  - Training info:       5/5
+  - Hyperparameters:     5/5
+  - Metrics recorded:    5/5
+  - Provenance:          5/5
+  - Description:         5/5
+
+TOTAL: 100/100 (EXCELLENT)
+</code></pre>
+<h2 id="diff-command"><a class="header" href="#diff-command">Diff Command</a></h2>
+<p>Compare two models to identify differences.</p>
+<pre><code class="language-bash"># Compare models
+apr diff model1.apr model2.apr
+
+# JSON output
+apr diff model1.apr model2.apr --json
+
+# Show weight-level differences
+apr diff model1.apr model2.apr --weights
+</code></pre>
+<h3 id="example-output-1"><a class="header" href="#example-output-1">Example Output</a></h3>
+<pre><code>Comparing model1.apr vs model2.apr
+
+DIFF: 3 differences found:
+
+  version: 1.0 → 1.1
+  model_name: old-model → new-model
+  payload_size: 1024 → 2048
+</code></pre>
+<h2 id="tensors-command"><a class="header" href="#tensors-command">Tensors Command</a></h2>
+<p>List tensor names, shapes, and statistics from APR model files. Useful for debugging model structure and identifying issues.</p>
+<pre><code class="language-bash"># List all tensors
+apr tensors model.apr
+
+# Show statistics (mean, std, min, max)
+apr tensors model.apr --stats
+
+# Filter by name pattern
+apr tensors model.apr --filter encoder
+
+# Limit output
+apr tensors model.apr --limit 10
+
+# JSON output
+apr tensors model.apr --json
+</code></pre>
+<h3 id="example-output-2"><a class="header" href="#example-output-2">Example Output</a></h3>
+<pre><code>=== Tensors: model.apr ===
+
+  Total tensors: 4
+  Total size: 79.7 MiB
+
+  encoder.conv1.weight [f32] [384, 80, 3]
+    Size: 360.0 KiB
+  encoder.conv1.bias [f32] [384]
+    Size: 1.5 KiB
+  decoder.embed_tokens.weight [f32] [51865, 384]
+    Size: 76.0 MiB
+  audio.mel_filterbank [f32] [80, 201]
+    Size: 62.8 KiB
+</code></pre>
+<h3 id="with-statistics"><a class="header" href="#with-statistics">With Statistics</a></h3>
+<pre><code class="language-bash">apr tensors model.apr --stats
+</code></pre>
+<pre><code>=== Tensors: model.apr ===
+
+  encoder.conv1.weight [f32] [384, 80, 3]
+    Size: 360.0 KiB
+    Stats: mean=0.0012, std=0.0534
+    Range: [-0.1823, 0.1756]
+</code></pre>
+<h2 id="trace-command"><a class="header" href="#trace-command">Trace Command</a></h2>
+<p>Layer-by-layer analysis with anomaly detection. Useful for debugging model behavior and identifying numerical issues.</p>
+<pre><code class="language-bash"># Basic layer trace
+apr trace model.apr
+
+# Verbose with per-layer statistics
+apr trace model.apr --verbose
+
+# Filter by layer name pattern
+apr trace model.apr --layer encoder
+
+# Compare with reference model
+apr trace model.apr --reference baseline.apr
+
+# JSON output for automation
+apr trace model.apr --json
+
+# Payload tracing through model
+apr trace model.apr --payload
+
+# Diff mode with reference
+apr trace model.apr --diff --reference old.apr
+</code></pre>
+<h3 id="example-output-3"><a class="header" href="#example-output-3">Example Output</a></h3>
+<pre><code>=== Layer Trace: model.apr ===
+
+  Format: APR v1.0
+  Layers: 6
+  Parameters: 39680000
+
+Layer Breakdown:
+  embedding
+  transformer_block_0 [0]
+  transformer_block_1 [1]
+  transformer_block_2 [2]
+  transformer_block_3 [3]
+  final_layer_norm
+</code></pre>
+<h3 id="verbose-output"><a class="header" href="#verbose-output">Verbose Output</a></h3>
+<pre><code class="language-bash">apr trace model.apr --verbose
+</code></pre>
+<pre><code>=== Layer Trace: model.apr ===
+
+Layer Breakdown:
+  embedding
+  transformer_block_0 [0]
+    weights: 768000 params, mean=0.0012, std=0.0534, L2=45.2
+    output:  mean=0.0001, std=0.9832, range=[-2.34, 2.45]
+  transformer_block_1 [1]
+    weights: 768000 params, mean=0.0008, std=0.0521, L2=44.8
+</code></pre>
+<h3 id="anomaly-detection"><a class="header" href="#anomaly-detection">Anomaly Detection</a></h3>
+<p>The trace command automatically detects numerical issues:</p>
+<pre><code>⚠ 2 anomalies detected:
+  - transformer_block_2: 5/1024 NaN values
+  - transformer_block_3: large values (max_abs=156.7)
+</code></pre>
+<h2 id="probar-command"><a class="header" href="#probar-command">Probar Command</a></h2>
+<p>Export layer-by-layer data for visual regression testing with the probar framework.</p>
+<pre><code class="language-bash"># Basic export (JSON + PNG)
+apr probar model.apr -o ./probar-export
+
+# JSON only
+apr probar model.apr -o ./probar-export --format json
+
+# PNG histograms only
+apr probar model.apr -o ./probar-export --format png
+
+# Compare with golden reference
+apr probar model.apr -o ./probar-export --golden ./golden-ref
+
+# Filter specific layers
+apr probar model.apr -o ./probar-export --layer encoder
+</code></pre>
+<h3 id="example-output-4"><a class="header" href="#example-output-4">Example Output</a></h3>
+<pre><code>=== Probar Export Complete ===
+
+  Source: model.apr
+  Output: ./probar-export
+  Format: APR v1.0
+  Layers: 4
+
+Golden reference comparison generated
+
+Generated files:
+  - ./probar-export/manifest.json
+  - ./probar-export/layer_000_block_0.pgm
+  - ./probar-export/layer_000_block_0.meta.json
+  - ./probar-export/layer_001_block_1.pgm
+  - ./probar-export/layer_001_block_1.meta.json
+
+Integration with probar:
+  1. Copy output to probar test fixtures
+  2. Use VisualRegressionTester to compare snapshots
+  3. Run: probar test --visual-diff
+</code></pre>
+<h3 id="manifest-format"><a class="header" href="#manifest-format">Manifest Format</a></h3>
+<p>The generated <code>manifest.json</code> contains:</p>
+<pre><code class="language-json">{
+  &quot;source_model&quot;: &quot;model.apr&quot;,
+  &quot;timestamp&quot;: &quot;2025-01-15T12:00:00Z&quot;,
+  &quot;format&quot;: &quot;APR v1.0&quot;,
+  &quot;layers&quot;: [
+    {
+      &quot;name&quot;: &quot;block_0&quot;,
+      &quot;index&quot;: 0,
+      &quot;histogram&quot;: [100, 100, ...],
+      &quot;mean&quot;: 0.0,
+      &quot;std&quot;: 1.0,
+      &quot;min&quot;: -3.0,
+      &quot;max&quot;: 3.0
+    }
+  ],
+  &quot;golden_reference&quot;: null
+}
+</code></pre>
+<h2 id="import-command"><a class="header" href="#import-command">Import Command</a></h2>
+<p>Import models from HuggingFace, local files, or URLs into APR format.</p>
+<pre><code class="language-bash"># Import from HuggingFace
+apr import hf://openai/whisper-tiny -o whisper.apr
+
+# Import with specific architecture
+apr import hf://meta-llama/Llama-2-7b -o llama.apr --arch llama
+
+# Import from local safetensors file
+apr import ./model.safetensors -o converted.apr
+
+# Import with quantization
+apr import hf://org/repo -o model.apr --quantize int8
+
+# Force import (skip validation)
+apr import ./model.bin -o model.apr --force
+</code></pre>
+<h3 id="supported-sources"><a class="header" href="#supported-sources">Supported Sources</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Source Type</th><th>Format</th><th>Example</th></tr></thead><tbody>
+<tr><td>HuggingFace</td><td><code>hf://org/repo</code></td><td><code>hf://openai/whisper-tiny</code></td></tr>
+<tr><td>Local File</td><td>Path</td><td><code>./model.safetensors</code></td></tr>
+<tr><td>URL</td><td>HTTP(S)</td><td><code>https://example.com/model.bin</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="architectures"><a class="header" href="#architectures">Architectures</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Architecture</th><th>Flag</th><th>Auto-Detection</th></tr></thead><tbody>
+<tr><td>Whisper</td><td><code>--arch whisper</code></td><td>✓</td></tr>
+<tr><td>LLaMA</td><td><code>--arch llama</code></td><td>✓</td></tr>
+<tr><td>BERT</td><td><code>--arch bert</code></td><td>✓</td></tr>
+<tr><td>Auto</td><td><code>--arch auto</code> (default)</td><td>✓</td></tr>
+</tbody></table>
+</div>
+<h3 id="quantization-options"><a class="header" href="#quantization-options">Quantization Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--quantize int8</code></td><td>8-bit integer quantization</td></tr>
+<tr><td><code>--quantize int4</code></td><td>4-bit integer quantization</td></tr>
+<tr><td><code>--quantize fp16</code></td><td>16-bit floating point</td></tr>
+</tbody></table>
+</div>
+<h3 id="example-output-5"><a class="header" href="#example-output-5">Example Output</a></h3>
+<pre><code>=== APR Import Pipeline ===
+
+Source: hf:// (HuggingFace)
+  Organization: openai
+  Repository: whisper-tiny
+Output: whisper.apr
+
+Architecture: Whisper
+Validation: Strict
+
+Importing...
+
+=== Validation Report ===
+Score: 98/100 (Grade: A+)
+
+✓ Import successful
+</code></pre>
+<h2 id="explain-command"><a class="header" href="#explain-command">Explain Command</a></h2>
+<p>Get explanations for error codes, tensor names, and model architectures. Supports all formats (APR, GGUF, SafeTensors) via RosettaStone.</p>
+<pre><code class="language-bash"># Explain an error code
+apr explain E002
+
+# Explain a specific tensor (by naming convention)
+apr explain --tensor encoder.conv1.weight
+
+# Explain a tensor from an actual model file (with shape, dtype, role)
+apr explain --tensor encoder.conv1.weight --file model.safetensors
+
+# Explain model architecture from file
+apr explain --file model.apr
+</code></pre>
+<h3 id="error-code-explanations"><a class="header" href="#error-code-explanations">Error Code Explanations</a></h3>
+<pre><code class="language-bash">apr explain E002
+</code></pre>
+<pre><code>Explain error code: E002
+**E002: Corrupted Data**
+The payload checksum does not match the header.
+- **Common Causes**: Interrupted download, bit rot, disk error.
+- **Troubleshooting**:
+  1. Run `apr validate --checksum` to verify.
+  2. Check source file integrity (MD5/SHA256).
+</code></pre>
+<h3 id="tensor-explanations"><a class="header" href="#tensor-explanations">Tensor Explanations</a></h3>
+<p>When a <code>--file</code> is provided, the tensor is looked up in the actual model via RosettaStone:</p>
+<pre><code class="language-bash">apr explain --tensor conv1 --file whisper-tiny.safetensors
+</code></pre>
+<pre><code>Explain tensor: conv1
+
+**model.encoder.conv1.weight**
+- **Shape**: [384, 80, 3]
+- **DType**: F32
+- **Role**: First convolutional layer (feature extraction)
+
+**model.encoder.conv1.bias**
+- **Shape**: [384]
+- **DType**: F32
+- **Role**: First convolutional layer (feature extraction)
+</code></pre>
+<p>Fuzzy matching finds all tensors containing the search term. If no match is found, similar tensor names are suggested.</p>
+<p>Without <code>--file</code>, explains the tensor role by naming convention:</p>
+<pre><code class="language-bash">apr explain --tensor q_proj
+</code></pre>
+<pre><code>Explain tensor: q_proj
+- **Role**: Query projection in attention mechanism
+</code></pre>
+<h3 id="architecture-explanations"><a class="header" href="#architecture-explanations">Architecture Explanations</a></h3>
+<p>Uses RosettaStone to inspect the actual model file and detect architecture:</p>
+<pre><code class="language-bash">apr explain --file whisper-tiny.safetensors
+</code></pre>
+<pre><code>Explain model architecture: whisper-tiny.safetensors
+- **Format**: SafeTensors
+- **Tensors**: 99
+- **Architecture**: Encoder-Decoder Transformer
+- **Examples**: Whisper, T5, BART
+- **Layers**: 4
+</code></pre>
+<h2 id="pull-command"><a class="header" href="#pull-command">Pull Command</a></h2>
+<p>Download and cache models from HuggingFace with Ollama-style UX.</p>
+<pre><code class="language-bash"># Download model to local cache
+apr pull hf://Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF
+
+# Download to specific directory
+apr pull hf://openai/whisper-tiny -o ./models/
+
+# Download specific file from repo
+apr pull hf://TheBloke/Llama-2-7B-GGUF --file llama-2-7b.Q4_K_M.gguf
+</code></pre>
+<h3 id="example-output-6"><a class="header" href="#example-output-6">Example Output</a></h3>
+<pre><code>Downloading: Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf
+Progress: [████████████████████] 100% (1.2 GB)
+Cached to: ~/.cache/apr/models/qwen2.5-coder-1.5b-q4_k_m.gguf
+</code></pre>
+<h2 id="list-command"><a class="header" href="#list-command">List Command</a></h2>
+<p>List all cached models.</p>
+<pre><code class="language-bash"># List cached models
+apr list
+
+# List with sizes
+apr list --size
+
+# JSON output
+apr list --json
+</code></pre>
+<h3 id="example-output-7"><a class="header" href="#example-output-7">Example Output</a></h3>
+<pre><code>Cached Models:
+  qwen2.5-coder-1.5b-q4_k_m.gguf  1.2 GB  2025-01-20
+  whisper-tiny.apr                39 MB   2025-01-18
+  llama-2-7b.Q4_K_M.gguf         3.8 GB  2025-01-15
+
+Total: 3 models, 5.04 GB
+</code></pre>
+<h2 id="rm-command"><a class="header" href="#rm-command">Rm Command</a></h2>
+<p>Remove models from cache.</p>
+<pre><code class="language-bash"># Remove specific model
+apr rm qwen2.5-coder-1.5b-q4_k_m.gguf
+
+# Remove all cached models
+apr rm --all
+
+# Dry run (show what would be deleted)
+apr rm --all --dry-run
+</code></pre>
+<h2 id="cbtop-command"><a class="header" href="#cbtop-command">Cbtop Command</a></h2>
+<p>Interactive ComputeBrick pipeline monitor (similar to htop for GPU/CPU inference).</p>
+<pre><code class="language-bash"># Start monitor
+apr cbtop
+
+# Monitor specific model
+apr cbtop --model model.gguf
+
+# Set refresh rate
+apr cbtop --refresh 500  # 500ms
+</code></pre>
+<h3 id="example-output-8"><a class="header" href="#example-output-8">Example Output</a></h3>
+<pre><code>┌─ ComputeBrick Pipeline Monitor ─────────────────────────┐
+│ Model: qwen2.5-coder-1.5b-q4_k_m.gguf                   │
+│ Backend: GPU (CUDA)                                      │
+├──────────────────────────────────────────────────────────┤
+│ Throughput: 125.3 tok/s                                  │
+│ Latency:    8.0 ms/tok                                   │
+│ Memory:     1.2 GB / 8.0 GB                              │
+│ Utilization: ████████████░░░░░░░░ 60%                    │
+├──────────────────────────────────────────────────────────┤
+│ Layer Timing:                                            │
+│   attention:  4.2 ms (52%)                               │
+│   ffn:        2.8 ms (35%)                               │
+│   other:      1.0 ms (13%)                               │
+└──────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="compare-hf-command"><a class="header" href="#compare-hf-command">Compare-hf Command</a></h2>
+<p>Compare a local model against HuggingFace source for validation. Supports APR, GGUF, and SafeTensors formats via automatic format detection.</p>
+<pre><code class="language-bash"># Compare local model against HF source (any format)
+apr compare-hf model.apr --hf openai/whisper-tiny
+apr compare-hf model.gguf --hf openai/whisper-tiny
+apr compare-hf model.safetensors --hf openai/whisper-tiny
+
+# Filter to specific tensor
+apr compare-hf model.apr --hf openai/whisper-tiny --tensor conv1
+
+# Custom threshold for floating point comparison
+apr compare-hf model.apr --hf openai/whisper-tiny --threshold 1e-5
+
+# JSON output
+apr compare-hf model.apr --hf openai/whisper-tiny --json
+</code></pre>
+<h3 id="example-output-9"><a class="header" href="#example-output-9">Example Output</a></h3>
+<pre><code>Loading local model: model.apr (Apr)
+Downloading HF model: openai/whisper-tiny
+Found 99 tensors in HF model
+
+======================================================================
+HuggingFace vs APR Weight Comparison
+======================================================================
+
+Total tensors compared: 99
+Passed threshold (&lt; 1e-06): 99
+
+Worst tensor: encoder.conv1.weight (diff=0.000000)
+
+All tensors match within threshold!
+</code></pre>
+<h2 id="hex-command"><a class="header" href="#hex-command">Hex Command</a></h2>
+<p>Hex dump tensor data for low-level debugging.</p>
+<pre><code class="language-bash"># Hex dump first 256 bytes
+apr hex model.apr --limit 256
+
+# Hex dump specific tensor
+apr hex model.apr --tensor encoder.conv1.weight --limit 128
+
+# Show ASCII alongside hex
+apr hex model.apr --ascii
+</code></pre>
+<h3 id="example-output-10"><a class="header" href="#example-output-10">Example Output</a></h3>
+<pre><code>=== Hex Dump: model.apr ===
+
+00000000: 4150 524e 0100 0000 0200 0000 4c69 6e65  APRN........Line
+00000010: 6172 5265 6772 6573 7369 6f6e 0000 0000  arRegression....
+00000020: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000030: 0a00 0000 0000 0000 0000 0000 0000 0000  ................
+</code></pre>
+<h2 id="tree-command"><a class="header" href="#tree-command">Tree Command</a></h2>
+<p>Display model architecture as a tree view.</p>
+<pre><code class="language-bash"># Show architecture tree
+apr tree model.gguf
+
+# Show with tensor shapes
+apr tree model.gguf --shapes
+
+# Show with parameter counts
+apr tree model.gguf --params
+</code></pre>
+<h3 id="example-output-11"><a class="header" href="#example-output-11">Example Output</a></h3>
+<pre><code>model.gguf (1.5B parameters)
+├── token_embd [51865, 384]
+├── encoder
+│   ├── conv1 [384, 80, 3]
+│   ├── conv2 [384, 384, 3]
+│   └── blocks (4 layers)
+│       ├── block.0
+│       │   ├── attn [384, 384] × 4
+│       │   └── mlp [384, 1536, 384]
+│       └── ...
+├── decoder
+│   ├── embed_tokens [51865, 384]
+│   └── blocks (4 layers)
+└── lm_head [51865, 384]
+</code></pre>
+<h2 id="flow-command"><a class="header" href="#flow-command">Flow Command</a></h2>
+<p>Visualize data flow through the model. Supports APR, GGUF, and SafeTensors formats via RosettaStone.</p>
+<pre><code class="language-bash"># Show data flow diagram
+apr flow model.safetensors
+
+# Filter to specific layer
+apr flow model.gguf --layer 0
+
+# Filter by component
+apr flow model.apr --component attention
+
+# JSON output (structured tensor groups and architecture)
+apr flow model.safetensors --json
+
+# Verbose output with tensor shapes
+apr flow model.apr --verbose
+</code></pre>
+<h3 id="example-output-12"><a class="header" href="#example-output-12">Example Output</a></h3>
+<pre><code>=== Data Flow: whisper-tiny.safetensors ===
+
+Architecture: Encoder-Decoder Transformer
+
+Embedding:
+  model.decoder.embed_tokens.weight [51865, 384] F32
+  model.decoder.embed_positions.weight [448, 384] F32
+
+Encoder Layers (4):
+  Layer 0: self_attn (q_proj, k_proj, v_proj, out_proj) + mlp (fc1, fc2) + layer_norm (x2)
+  Layer 1: ...
+  ...
+
+Decoder Layers (4):
+  Layer 0: self_attn + encoder_attn + mlp + layer_norm (x3)
+  ...
+
+Output:
+  proj_out.weight [51865, 384] F32
+</code></pre>
+<h3 id="json-output"><a class="header" href="#json-output">JSON Output</a></h3>
+<pre><code class="language-bash">apr flow model.safetensors --json
+</code></pre>
+<pre><code class="language-json">{
+  &quot;file&quot;: &quot;model.safetensors&quot;,
+  &quot;format&quot;: &quot;SafeTensors&quot;,
+  &quot;architecture&quot;: &quot;Encoder-Decoder Transformer&quot;,
+  &quot;total_tensors&quot;: 99,
+  &quot;groups&quot;: {
+    &quot;embedding&quot;: [&quot;model.decoder.embed_tokens.weight&quot;, &quot;...&quot;],
+    &quot;encoder&quot;: [&quot;model.encoder.layers.0.self_attn.q_proj.weight&quot;, &quot;...&quot;],
+    &quot;decoder&quot;: [&quot;model.decoder.layers.0.self_attn.q_proj.weight&quot;, &quot;...&quot;],
+    &quot;output&quot;: [&quot;proj_out.weight&quot;]
+  },
+  &quot;encoder_layers&quot;: 4,
+  &quot;decoder_layers&quot;: 4
+}
+</code></pre>
+<h2 id="bench-command"><a class="header" href="#bench-command">Bench Command</a></h2>
+<p>Benchmark model throughput (spec H12: &gt;= 10 tok/s).</p>
+<pre><code class="language-bash"># Run benchmark
+apr bench model.gguf
+
+# Specify iterations
+apr bench model.gguf --iterations 100
+
+# Benchmark with specific prompt
+apr bench model.gguf --prompt &quot;Hello, world!&quot;
+
+# JSON output for CI
+apr bench model.gguf --json
+</code></pre>
+<h3 id="example-output-13"><a class="header" href="#example-output-13">Example Output</a></h3>
+<pre><code>=== Benchmark: model.gguf ===
+
+Configuration:
+  Iterations: 50
+  Warmup: 5
+  Prompt: &quot;Hello, how are you?&quot;
+
+Results:
+  Throughput: 125.3 tok/s
+  Latency (p50): 8.0 ms
+  Latency (p99): 12.3 ms
+  Memory Peak: 1.2 GB
+
+Spec H12 (&gt;= 10 tok/s): ✓ PASS
+</code></pre>
+<h2 id="eval-command"><a class="header" href="#eval-command">Eval Command</a></h2>
+<p>Evaluate model perplexity (spec H13: PPL &lt;= 20).</p>
+<pre><code class="language-bash"># Evaluate perplexity
+apr eval model.gguf
+
+# Evaluate on specific dataset
+apr eval model.gguf --dataset wikitext-2
+
+# Limit context length
+apr eval model.gguf --context 512
+
+# JSON output
+apr eval model.gguf --json
+</code></pre>
+<h3 id="example-output-14"><a class="header" href="#example-output-14">Example Output</a></h3>
+<pre><code>=== Evaluation: model.gguf ===
+
+Dataset: wikitext-2
+Tokens: 10000
+Context: 2048
+
+Results:
+  Perplexity: 8.45
+  Bits per byte: 2.31
+  Cross-entropy: 2.13
+
+Spec H13 (PPL &lt;= 20): ✓ PASS
+</code></pre>
+<h2 id="profile-command"><a class="header" href="#profile-command">Profile Command</a></h2>
+<p>Deep profiling with Roofline analysis.</p>
+<pre><code class="language-bash"># Run profiler
+apr profile model.gguf
+
+# Profile specific layers
+apr profile model.gguf --layer attention
+
+# Generate roofline plot data
+apr profile model.gguf --roofline
+
+# Output as JSON
+apr profile model.gguf --json
+</code></pre>
+<h3 id="example-output-15"><a class="header" href="#example-output-15">Example Output</a></h3>
+<pre><code>=== Profile: model.gguf ===
+
+Roofline Analysis:
+  Peak Compute: 2.5 TFLOPS
+  Peak Memory BW: 200 GB/s
+  Arithmetic Intensity: 12.5 FLOPS/byte
+
+Layer Breakdown:
+  Layer              Time (ms)   Memory   Compute   Bound
+  ─────────────────────────────────────────────────────────
+  token_embd         0.5         128 MB   0.1 TF    Memory
+  attention          4.2         256 MB   0.8 TF    Compute
+  ffn                2.8         512 MB   1.2 TF    Compute
+  lm_head            0.8         384 MB   0.4 TF    Memory
+
+Bottleneck: Attention layer (compute-bound)
+Recommendation: Increase batch size for better GPU utilization
+</code></pre>
+<h2 id="qa-command"><a class="header" href="#qa-command">QA Command</a></h2>
+<p>Falsifiable QA checklist for model releases.</p>
+<pre><code class="language-bash"># Run full QA checklist
+apr qa model.gguf
+
+# Specify throughput threshold
+apr qa model.gguf --assert-tps 100
+
+# Require Ollama speedup
+apr qa model.gguf --assert-speedup 2.0
+
+# Skip Ollama comparison
+apr qa model.gguf --skip-ollama
+
+# JSON output for CI
+apr qa model.gguf --json
+</code></pre>
+<h3 id="example-output-16"><a class="header" href="#example-output-16">Example Output</a></h3>
+<pre><code>=== QA Checklist: model.gguf ===
+
+[1/10] Format Validation
+  ✓ Valid GGUF header
+  ✓ All tensors readable
+  ✓ No NaN/Inf values
+
+[2/10] Golden Output Test
+  ✓ Prompt: &quot;Hello&quot; → &quot;Hello! How can I help you today?&quot;
+  ✓ Output matches expected (cosine sim: 0.98)
+
+[3/10] Throughput Test
+  ✓ 125.3 tok/s (threshold: 10 tok/s)
+
+[4/10] Perplexity Test
+  ✓ PPL: 8.45 (threshold: 20.0)
+
+[5/10] Ollama Parity
+  ✓ 2.93x Ollama throughput
+
+...
+
+Result: 10/10 PASS
+</code></pre>
+<h2 id="qualify-command"><a class="header" href="#qualify-command">Qualify Command</a></h2>
+<p>Cross-subcommand smoke test: runs every diagnostic CLI tool against a model to verify no crashes. Fills the gap between <code>apr qa</code> (inference quality gates) and unit tests (isolated logic).</p>
+<pre><code class="language-bash"># Smoke test all 11 diagnostic tools on a model
+apr qualify model.gguf
+
+# Standard tier (smoke + contract audit via pv)
+apr qualify model.gguf --tier standard
+
+# Full tier (standard + playbook check via apr-qa)
+apr qualify model.gguf --tier full
+
+# JSON output for CI
+apr qualify model.gguf --json
+
+# Skip slow gates
+apr qualify model.gguf --skip validate,validate_quality
+
+# Show subcommand output
+apr qualify model.gguf --verbose
+</code></pre>
+<h3 id="tiers"><a class="header" href="#tiers">Tiers</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Tier</th><th>Gates</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>smoke</code> (default)</td><td>11</td><td>In-process: inspect, validate, validate --quality, tensors, lint, debug, tree, hex, flow, explain, check</td></tr>
+<tr><td><code>standard</code></td><td>12</td><td>Smoke + contract audit via <code>pv</code></td></tr>
+<tr><td><code>full</code></td><td>13</td><td>Standard + playbook check via <code>apr-qa</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="example-output-17"><a class="header" href="#example-output-17">Example Output</a></h3>
+<pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Qualify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Model: model.gguf
+  Tier: smoke
+
+  ✓ PASS Inspect (1.3s)
+  ✓ PASS Validate (1.3m)
+  ✓ PASS Validate (quality) (1.4m)
+  ✓ PASS Tensors (1.3s)
+  ✓ PASS Lint (688ms)
+  ✓ PASS Debug (1.3s)
+  ✓ PASS Tree (1.3s)
+  ✓ PASS Hex (674ms)
+  ✓ PASS Flow (1.9s)
+  ✓ PASS Explain (1.3s)
+  ✓ PASS Check (pipeline) (3.9s)
+
+  ✓ ALL GATES PASSED
+  Total Duration: 2.9m
+</code></pre>
+<h2 id="showcase-command"><a class="header" href="#showcase-command">Showcase Command</a></h2>
+<p>Qwen2.5-Coder showcase demo for performance demonstration.</p>
+<pre><code class="language-bash"># Run showcase demo
+apr showcase model.gguf
+
+# Specify warmup and iterations
+apr showcase model.gguf --warmup 3 --iterations 10
+
+# GPU mode
+apr showcase model.gguf --gpu
+
+# Batched GPU mode
+apr showcase model.gguf --gpu --batch
+</code></pre>
+<h3 id="example-output-18"><a class="header" href="#example-output-18">Example Output</a></h3>
+<pre><code>╔════════════════════════════════════════════════════════════╗
+║           APR Showcase: Qwen2.5-Coder Performance          ║
+╚════════════════════════════════════════════════════════════╝
+
+Model: qwen2.5-coder-1.5b-q4_k_m.gguf
+Backend: GPU (CUDA)
+Mode: Batched (M=16)
+
+Benchmark Results:
+  ┌────────────────┬────────────┬───────────┐
+  │ Metric         │ Value      │ vs Ollama │
+  ├────────────────┼────────────┼───────────┤
+  │ Throughput     │ 851.8 t/s  │ 2.93x     │
+  │ Time to First  │ 45 ms      │ 0.8x      │
+  │ Memory         │ 1.9 GB     │ 1.2x      │
+  └────────────────┴────────────┴───────────┘
+
+✓ Showcase PASSED: 2.93x Ollama performance achieved
+</code></pre>
+<h2 id="check-command"><a class="header" href="#check-command">Check Command</a></h2>
+<p>Model self-test: 10-stage pipeline integrity check (APR-TRACE-001).</p>
+<pre><code class="language-bash"># Run full check
+apr check model.gguf
+
+# Verbose output
+apr check model.gguf --verbose
+
+# JSON output
+apr check model.gguf --json
+</code></pre>
+<h3 id="example-output-19"><a class="header" href="#example-output-19">Example Output</a></h3>
+<pre><code>=== Model Self-Test: model.gguf ===
+
+Stage 1: Format Validation
+  ✓ GGUF magic bytes valid
+  ✓ Version: 3
+  ✓ Tensor count: 145
+
+Stage 2: Tensor Integrity
+  ✓ All tensors readable
+  ✓ Shapes consistent
+  ✓ No NaN/Inf values
+
+Stage 3: Tokenizer Check
+  ✓ Vocabulary size: 151936
+  ✓ Special tokens present
+  ✓ BPE merges valid
+
+Stage 4: Embedding Test
+  ✓ Token embedding produces valid vectors
+  ✓ L2 norm in expected range
+
+Stage 5: Attention Test
+  ✓ Self-attention computes correctly
+  ✓ KV cache initialized
+
+Stage 6: FFN Test
+  ✓ Feed-forward produces valid output
+  ✓ Activation function working
+
+Stage 7: Layer Norm Test
+  ✓ RMSNorm produces normalized output
+  ✓ Epsilon handling correct
+
+Stage 8: LM Head Test
+  ✓ Logits in valid range
+  ✓ Vocabulary mapping correct
+
+Stage 9: Generation Test
+  ✓ Can generate 10 tokens
+  ✓ Output is coherent text
+
+Stage 10: Performance Test
+  ✓ Throughput: 125 tok/s (&gt; 10 tok/s)
+
+Result: 10/10 PASS
+</code></pre>
+<h2 id="publish-command"><a class="header" href="#publish-command">Publish Command</a></h2>
+<p>Publish model to HuggingFace Hub (APR-PUB-001).</p>
+<pre><code class="language-bash"># Publish model directory
+apr publish ./model-dir/ org/model-name
+
+# Dry run (show what would be uploaded)
+apr publish ./model-dir/ org/model-name --dry-run
+
+# Specify license and tags
+apr publish ./model-dir/ org/model-name --license mit --tags rust,ml
+
+# Custom commit message
+apr publish ./model-dir/ org/model-name --message &quot;v1.0.0 release&quot;
+</code></pre>
+<h3 id="example-output-20"><a class="header" href="#example-output-20">Example Output</a></h3>
+<pre><code>=== Publishing to HuggingFace Hub ===
+
+Repository: org/model-name
+Files to upload:
+  - model.gguf (1.2 GB)
+  - config.json (2 KB)
+  - tokenizer.json (500 KB)
+
+Generating README.md with model card...
+
+Uploading...
+  [████████████████████] 100% model.gguf
+  [████████████████████] 100% config.json
+  [████████████████████] 100% tokenizer.json
+  [████████████████████] 100% README.md
+
+✓ Published to https://huggingface.co/org/model-name
+</code></pre>
+<h2 id="exit-codes"><a class="header" href="#exit-codes">Exit Codes</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>0</td><td>Success</td></tr>
+<tr><td>1</td><td>General error</td></tr>
+<tr><td>3</td><td>File not found / Not a file</td></tr>
+<tr><td>4</td><td>Invalid APR format</td></tr>
+<tr><td>5</td><td>Validation failed</td></tr>
+<tr><td>7</td><td>I/O error</td></tr>
+</tbody></table>
+</div>
+<h2 id="integration-with-cicd"><a class="header" href="#integration-with-cicd">Integration with CI/CD</a></h2>
+<p>Use <code>apr validate --strict</code> in CI pipelines to ensure model quality:</p>
+<pre><code class="language-yaml"># GitHub Actions example
+- name: Validate Model
+  run: apr validate models/production.apr --quality --strict
+</code></pre>
+<h2 id="toyota-way-principles-in-apr-cli"><a class="header" href="#toyota-way-principles-in-apr-cli">Toyota Way Principles in apr-cli</a></h2>
+<ol>
+<li><strong>Genchi Genbutsu (Go and See)</strong>: <code>apr inspect</code> lets you see the actual model data, not abstractions</li>
+<li><strong>Genchi Genbutsu (Go to the Source)</strong>: <code>apr tensors</code> reveals the actual tensor structure and statistics</li>
+<li><strong>Jidoka (Built-in Quality)</strong>: <code>apr validate</code> stops on quality issues with clear feedback</li>
+<li><strong>Visualization</strong>: <code>apr debug --drama</code> makes problems visible and understandable</li>
+<li><strong>Kaizen (Continuous Improvement)</strong>: <code>apr diff</code> enables comparing models for improvement</li>
+<li><strong>Visualization</strong>: <code>apr trace</code> makes layer-by-layer behavior visible with anomaly detection</li>
+<li><strong>Standardization</strong>: <code>apr probar</code> creates repeatable visual regression tests</li>
+<li><strong>Automation</strong>: <code>apr import</code> automates model conversion with inline validation</li>
+<li><strong>Knowledge Sharing</strong>: <code>apr explain</code> documents errors, tensors, and architectures</li>
+</ol>
+<h2 id="see-also"><a class="header" href="#see-also">See Also</a></h2>
+<ul>
+<li><a href="../examples/model-format.html">APR Model Format Specification</a></li>
+<li><a href="../examples/apr-inspection.html">APR Model Inspection</a></li>
+<li><a href="../examples/apr-scoring.html">APR 100-Point Quality Scoring</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../tools/pmat.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tools/apr-spec.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../tools/pmat.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tools/apr-spec.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

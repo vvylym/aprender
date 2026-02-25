@@ -1,0 +1,817 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Feature Scaling Theory - EXTREME TDD - The Aprender Guide to Zero-Defect Machine Learning</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive guide to EXTREME TDD methodology: RED-GREEN-REFACTOR cycles, mutation testing, and Toyota Way principles demonstrated through ML library development">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Methodology</li><li class="chapter-item expanded "><a href="../methodology/what-is-extreme-tdd.html"><strong aria-hidden="true">1.</strong> What is EXTREME TDD?</a></li><li class="chapter-item expanded "><a href="../methodology/red-green-refactor.html"><strong aria-hidden="true">2.</strong> The RED-GREEN-REFACTOR Cycle</a></li><li class="chapter-item expanded "><a href="../methodology/test-first-philosophy.html"><strong aria-hidden="true">3.</strong> Test-First Philosophy</a></li><li class="chapter-item expanded "><a href="../methodology/zero-tolerance.html"><strong aria-hidden="true">4.</strong> Zero Tolerance Quality</a></li><li class="chapter-item expanded affix "><li class="part-title">The RED Phase</li><li class="chapter-item expanded "><a href="../red-phase/failing-tests-first.html"><strong aria-hidden="true">5.</strong> Writing Failing Tests First</a></li><li class="chapter-item expanded "><a href="../red-phase/test-categories.html"><strong aria-hidden="true">6.</strong> Test Categories</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../red-phase/unit-tests.html"><strong aria-hidden="true">6.1.</strong> Unit Tests</a></li><li class="chapter-item expanded "><a href="../red-phase/integration-tests.html"><strong aria-hidden="true">6.2.</strong> Integration Tests</a></li><li class="chapter-item expanded "><a href="../red-phase/property-based-tests.html"><strong aria-hidden="true">6.3.</strong> Property-Based Tests</a></li></ol></li><li class="chapter-item expanded "><a href="../red-phase/verification-strategy.html"><strong aria-hidden="true">7.</strong> Verification Strategy</a></li><li class="chapter-item expanded affix "><li class="part-title">The GREEN Phase</li><li class="chapter-item expanded "><a href="../green-phase/minimal-implementation.html"><strong aria-hidden="true">8.</strong> Minimal Implementation</a></li><li class="chapter-item expanded "><a href="../green-phase/making-tests-pass.html"><strong aria-hidden="true">9.</strong> Making Tests Pass</a></li><li class="chapter-item expanded "><a href="../green-phase/avoiding-over-engineering.html"><strong aria-hidden="true">10.</strong> Avoiding Over-Engineering</a></li><li class="chapter-item expanded "><a href="../green-phase/simplest-thing.html"><strong aria-hidden="true">11.</strong> The Simplest Thing That Works</a></li><li class="chapter-item expanded affix "><li class="part-title">The REFACTOR Phase</li><li class="chapter-item expanded "><a href="../refactor-phase/refactoring-with-confidence.html"><strong aria-hidden="true">12.</strong> Refactoring with Confidence</a></li><li class="chapter-item expanded "><a href="../refactor-phase/code-quality.html"><strong aria-hidden="true">13.</strong> Code Quality Improvements</a></li><li class="chapter-item expanded "><a href="../refactor-phase/performance-optimization.html"><strong aria-hidden="true">14.</strong> Performance Optimization</a></li><li class="chapter-item expanded "><a href="../refactor-phase/documentation.html"><strong aria-hidden="true">15.</strong> Documentation</a></li><li class="chapter-item expanded affix "><li class="part-title">Advanced Testing</li><li class="chapter-item expanded "><a href="../advanced-testing/popperian-falsification.html"><strong aria-hidden="true">16.</strong> Popperian Falsification</a></li><li class="chapter-item expanded "><a href="../advanced-testing/property-based-testing.html"><strong aria-hidden="true">17.</strong> Property-Based Testing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced-testing/proptest-fundamentals.html"><strong aria-hidden="true">17.1.</strong> Proptest Fundamentals</a></li><li class="chapter-item expanded "><a href="../advanced-testing/strategies-generators.html"><strong aria-hidden="true">17.2.</strong> Strategies and Generators</a></li><li class="chapter-item expanded "><a href="../advanced-testing/testing-invariants.html"><strong aria-hidden="true">17.3.</strong> Testing Invariants</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced-testing/mutation-testing.html"><strong aria-hidden="true">18.</strong> Mutation Testing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced-testing/what-is-mutation-testing.html"><strong aria-hidden="true">18.1.</strong> What is Mutation Testing?</a></li><li class="chapter-item expanded "><a href="../advanced-testing/using-cargo-mutants.html"><strong aria-hidden="true">18.2.</strong> Using cargo-mutants</a></li><li class="chapter-item expanded "><a href="../advanced-testing/mutation-score-targets.html"><strong aria-hidden="true">18.3.</strong> Mutation Score Targets</a></li><li class="chapter-item expanded "><a href="../advanced-testing/killing-mutants.html"><strong aria-hidden="true">18.4.</strong> Killing Mutants</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced-testing/fuzzing.html"><strong aria-hidden="true">19.</strong> Fuzzing</a></li><li class="chapter-item expanded "><a href="../advanced-testing/benchmark-testing.html"><strong aria-hidden="true">20.</strong> Benchmark Testing</a></li><li class="chapter-item expanded affix "><li class="part-title">Quality Gates</li><li class="chapter-item expanded "><a href="../quality-gates/pre-commit-hooks.html"><strong aria-hidden="true">21.</strong> Pre-Commit Hooks</a></li><li class="chapter-item expanded "><a href="../quality-gates/continuous-integration.html"><strong aria-hidden="true">22.</strong> Continuous Integration</a></li><li class="chapter-item expanded "><a href="../quality-gates/code-formatting.html"><strong aria-hidden="true">23.</strong> Code Formatting (rustfmt)</a></li><li class="chapter-item expanded "><a href="../quality-gates/linting-clippy.html"><strong aria-hidden="true">24.</strong> Linting (clippy)</a></li><li class="chapter-item expanded "><a href="../quality-gates/coverage-measurement.html"><strong aria-hidden="true">25.</strong> Coverage Measurement</a></li><li class="chapter-item expanded "><a href="../quality-gates/complexity-analysis.html"><strong aria-hidden="true">26.</strong> Complexity Analysis</a></li><li class="chapter-item expanded "><a href="../quality-gates/tdg-score.html"><strong aria-hidden="true">27.</strong> Technical Debt Gradient (TDG)</a></li><li class="chapter-item expanded affix "><li class="part-title">Toyota Way Principles</li><li class="chapter-item expanded "><a href="../toyota-way/overview.html"><strong aria-hidden="true">28.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../toyota-way/kaizen.html"><strong aria-hidden="true">29.</strong> Kaizen (Continuous Improvement)</a></li><li class="chapter-item expanded "><a href="../toyota-way/genchi-genbutsu.html"><strong aria-hidden="true">30.</strong> Genchi Genbutsu (Go and See)</a></li><li class="chapter-item expanded "><a href="../toyota-way/jidoka.html"><strong aria-hidden="true">31.</strong> Jidoka (Built-in Quality)</a></li><li class="chapter-item expanded "><a href="../toyota-way/pdca-cycle.html"><strong aria-hidden="true">32.</strong> PDCA Cycle</a></li><li class="chapter-item expanded "><a href="../toyota-way/respect-for-people.html"><strong aria-hidden="true">33.</strong> Respect for People</a></li><li class="chapter-item expanded affix "><li class="part-title">Machine Learning Fundamentals</li><li class="chapter-item expanded "><a href="../ml-fundamentals/linear-regression.html"><strong aria-hidden="true">34.</strong> Linear Regression Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/regularization.html"><strong aria-hidden="true">35.</strong> Regularization Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/logistic-regression.html"><strong aria-hidden="true">36.</strong> Logistic Regression Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/knn.html"><strong aria-hidden="true">37.</strong> K-Nearest Neighbors (kNN) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/naive-bayes.html"><strong aria-hidden="true">38.</strong> Naive Bayes Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/bayesian-inference.html"><strong aria-hidden="true">39.</strong> Bayesian Inference Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/svm.html"><strong aria-hidden="true">40.</strong> Support Vector Machines (SVM) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/decision-trees.html"><strong aria-hidden="true">41.</strong> Decision Trees Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/ensemble-methods.html"><strong aria-hidden="true">42.</strong> Ensemble Methods Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/kmeans-clustering.html"><strong aria-hidden="true">43.</strong> K-Means Clustering Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/pca.html"><strong aria-hidden="true">44.</strong> Principal Component Analysis (PCA) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/tsne.html"><strong aria-hidden="true">45.</strong> t-SNE (t-Distributed Stochastic Neighbor Embedding) Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/regression-metrics.html"><strong aria-hidden="true">46.</strong> Regression Metrics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/classification-metrics.html"><strong aria-hidden="true">47.</strong> Classification Metrics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/cross-validation.html"><strong aria-hidden="true">48.</strong> Cross-Validation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/gradient-descent.html"><strong aria-hidden="true">49.</strong> Gradient Descent Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/advanced-optimizers.html"><strong aria-hidden="true">50.</strong> Advanced Optimizers Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/metaheuristics.html"><strong aria-hidden="true">51.</strong> Metaheuristics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/automl.html"><strong aria-hidden="true">52.</strong> AutoML: Automated Machine Learning</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/compiler-in-the-loop.html"><strong aria-hidden="true">53.</strong> Compiler-in-the-Loop Learning</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/online-learning.html"><strong aria-hidden="true">54.</strong> Online Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/neuro-symbolic.html"><strong aria-hidden="true">55.</strong> Neuro-Symbolic Reasoning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/transfer-learning.html"><strong aria-hidden="true">56.</strong> Transfer Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/active-learning.html"><strong aria-hidden="true">57.</strong> Active Learning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/weak-supervision.html"><strong aria-hidden="true">58.</strong> Weak Supervision Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/automatic-differentiation.html"><strong aria-hidden="true">59.</strong> Automatic Differentiation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-neural-networks.html"><strong aria-hidden="true">60.</strong> Graph Neural Networks Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/neural-network-pruning.html"><strong aria-hidden="true">61.</strong> Neural Network Pruning Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/lottery-ticket-hypothesis.html"><strong aria-hidden="true">62.</strong> Lottery Ticket Hypothesis Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/monte-carlo.html"><strong aria-hidden="true">63.</strong> Monte Carlo Simulation Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/speech-voice-processing.html"><strong aria-hidden="true">64.</strong> Speech and Voice Processing Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/probability-calibration.html"><strong aria-hidden="true">65.</strong> Probability Calibration Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/chaos-engineering.html"><strong aria-hidden="true">66.</strong> Chaos Engineering for ML</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/webassembly-ml.html"><strong aria-hidden="true">67.</strong> WebAssembly for ML</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/feature-scaling.html" class="active"><strong aria-hidden="true">68.</strong> Feature Scaling Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/audio-processing.html"><strong aria-hidden="true">69.</strong> Audio Processing Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-algorithms.html"><strong aria-hidden="true">70.</strong> Graph Algorithms Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-pathfinding.html"><strong aria-hidden="true">71.</strong> Graph Pathfinding Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-components-traversal.html"><strong aria-hidden="true">72.</strong> Graph Components and Traversal</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/graph-link-prediction.html"><strong aria-hidden="true">73.</strong> Graph Link Prediction and Community Detection</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/descriptive-statistics.html"><strong aria-hidden="true">74.</strong> Descriptive Statistics Theory</a></li><li class="chapter-item expanded "><a href="../ml-fundamentals/apriori.html"><strong aria-hidden="true">75.</strong> Apriori Algorithm Theory</a></li><li class="chapter-item expanded affix "><li class="part-title">Real-World Examples from Aprender</li><li class="chapter-item expanded "><a href="../examples/examples-reference.html"><strong aria-hidden="true">76.</strong> Examples Reference</a></li><li class="chapter-item expanded "><a href="../examples/linear-regression.html"><strong aria-hidden="true">77.</strong> Case Study: Linear Regression</a></li><li class="chapter-item expanded "><a href="../examples/boston-housing.html"><strong aria-hidden="true">78.</strong> Case Study: Boston Housing</a></li><li class="chapter-item expanded "><a href="../examples/cross-validation.html"><strong aria-hidden="true">79.</strong> Case Study: Cross-Validation</a></li><li class="chapter-item expanded "><a href="../examples/grid-search-tuning.html"><strong aria-hidden="true">80.</strong> Case Study: Grid Search Hyperparameter Tuning</a></li><li class="chapter-item expanded "><a href="../examples/automl-clustering.html"><strong aria-hidden="true">81.</strong> Case Study: AutoML Clustering (TPE)</a></li><li class="chapter-item expanded "><a href="../examples/random-forest.html"><strong aria-hidden="true">82.</strong> Case Study: Random Forest</a></li><li class="chapter-item expanded "><a href="../examples/random-forest-iris.html"><strong aria-hidden="true">83.</strong> Case Study: Random Forest Iris</a></li><li class="chapter-item expanded "><a href="../examples/random-forest-regression.html"><strong aria-hidden="true">84.</strong> Case Study: Random Forest Regression</a></li><li class="chapter-item expanded "><a href="../examples/decision-tree-iris.html"><strong aria-hidden="true">85.</strong> Case Study: Decision Tree Iris</a></li><li class="chapter-item expanded "><a href="../examples/decision-tree-regression.html"><strong aria-hidden="true">86.</strong> Case Study: Decision Tree Regression</a></li><li class="chapter-item expanded "><a href="../examples/model-serialization.html"><strong aria-hidden="true">87.</strong> Case Study: Model Serialization</a></li><li class="chapter-item expanded "><a href="../examples/model-format.html"><strong aria-hidden="true">88.</strong> Case Study: Model Format (.apr)</a></li><li class="chapter-item expanded "><a href="../examples/apr-format-deep-dive.html"><strong aria-hidden="true">89.</strong> The .apr Format: A Five Whys Deep Dive</a></li><li class="chapter-item expanded "><a href="../examples/model-bundling-paging.html"><strong aria-hidden="true">90.</strong> Case Study: Model Bundling and Memory Paging</a></li><li class="chapter-item expanded "><a href="../examples/tracing-memory-paging.html"><strong aria-hidden="true">91.</strong> Case Study: Tracing Memory Paging with Renacer</a></li><li class="chapter-item expanded "><a href="../examples/bundle-trace-demo.html"><strong aria-hidden="true">92.</strong> Case Study: Bundle Trace Demo</a></li><li class="chapter-item expanded "><a href="../examples/synthetic-data-generation.html"><strong aria-hidden="true">93.</strong> Case Study: Synthetic Data Generation</a></li><li class="chapter-item expanded "><a href="../examples/code-eda.html"><strong aria-hidden="true">94.</strong> Case Study: Code-Aware EDA</a></li><li class="chapter-item expanded "><a href="../examples/code-feature-extractor.html"><strong aria-hidden="true">95.</strong> Case Study: Code Feature Extraction</a></li><li class="chapter-item expanded "><a href="../examples/code-analysis.html"><strong aria-hidden="true">96.</strong> Case Study: Code Analysis with Code2Vec and MPNN</a></li><li class="chapter-item expanded "><a href="../examples/kmeans-clustering.html"><strong aria-hidden="true">97.</strong> Case Study: KMeans Clustering</a></li><li class="chapter-item expanded "><a href="../examples/dbscan-clustering.html"><strong aria-hidden="true">98.</strong> Case Study: DBSCAN Clustering</a></li><li class="chapter-item expanded "><a href="../examples/hierarchical-clustering.html"><strong aria-hidden="true">99.</strong> Case Study: Hierarchical Clustering</a></li><li class="chapter-item expanded "><a href="../examples/gmm-clustering.html"><strong aria-hidden="true">100.</strong> Case Study: GMM Clustering</a></li><li class="chapter-item expanded "><a href="../examples/iris-clustering.html"><strong aria-hidden="true">101.</strong> Case Study: Iris Clustering</a></li><li class="chapter-item expanded "><a href="../examples/logistic-regression.html"><strong aria-hidden="true">102.</strong> Case Study: Logistic Regression</a></li><li class="chapter-item expanded "><a href="../examples/knn-iris.html"><strong aria-hidden="true">103.</strong> Case Study: KNN Iris</a></li><li class="chapter-item expanded "><a href="../examples/naive-bayes-iris.html"><strong aria-hidden="true">104.</strong> Case Study: Naive Bayes Iris</a></li><li class="chapter-item expanded "><a href="../examples/beta-binomial-inference.html"><strong aria-hidden="true">105.</strong> Case Study: Beta-Binomial Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/gamma-poisson-inference.html"><strong aria-hidden="true">106.</strong> Case Study: Gamma-Poisson Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/normal-inverse-gamma-inference.html"><strong aria-hidden="true">107.</strong> Case Study: Normal-InverseGamma Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/dirichlet-multinomial-inference.html"><strong aria-hidden="true">108.</strong> Case Study: Dirichlet-Multinomial Bayesian Inference</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-linear-regression.html"><strong aria-hidden="true">109.</strong> Case Study: Bayesian Linear Regression</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-logistic-regression.html"><strong aria-hidden="true">110.</strong> Case Study: Bayesian Logistic Regression</a></li><li class="chapter-item expanded "><a href="../examples/negative-binomial-glm.html"><strong aria-hidden="true">111.</strong> Case Study: Negative Binomial GLM (Overdispersed Counts)</a></li><li class="chapter-item expanded "><a href="../examples/svm-iris.html"><strong aria-hidden="true">112.</strong> Case Study: SVM Iris</a></li><li class="chapter-item expanded "><a href="../examples/gbm-iris.html"><strong aria-hidden="true">113.</strong> Case Study: Gradient Boosting Iris</a></li><li class="chapter-item expanded "><a href="../examples/regularized-regression.html"><strong aria-hidden="true">114.</strong> Case Study: Regularized Regression</a></li><li class="chapter-item expanded "><a href="../examples/optimizer-demo.html"><strong aria-hidden="true">115.</strong> Case Study: Optimizer Demo</a></li><li class="chapter-item expanded "><a href="../examples/batch-optimization.html"><strong aria-hidden="true">116.</strong> Case Study: Batch Optimization</a></li><li class="chapter-item expanded "><a href="../examples/convex-optimization.html"><strong aria-hidden="true">117.</strong> Case Study: Convex Optimization (FISTA + Coordinate Descent)</a></li><li class="chapter-item expanded "><a href="../examples/constrained-optimization.html"><strong aria-hidden="true">118.</strong> Case Study: Constrained Optimization (Projected GD + Augmented Lagrangian + Interior Point)</a></li><li class="chapter-item expanded "><a href="../examples/admm-optimization.html"><strong aria-hidden="true">119.</strong> Case Study: ADMM Optimization (Distributed ML + Federated Learning)</a></li><li class="chapter-item expanded "><a href="../examples/differential-evolution.html"><strong aria-hidden="true">120.</strong> Case Study: Differential Evolution (Metaheuristics)</a></li><li class="chapter-item expanded "><a href="../examples/metaheuristics-optimization.html"><strong aria-hidden="true">121.</strong> Case Study: Metaheuristics Optimization</a></li><li class="chapter-item expanded "><a href="../examples/aco-tsp.html"><strong aria-hidden="true">122.</strong> Case Study: Ant Colony Optimization (TSP)</a></li><li class="chapter-item expanded "><a href="../examples/tabu-tsp.html"><strong aria-hidden="true">123.</strong> Case Study: Tabu Search (TSP)</a></li><li class="chapter-item expanded "><a href="../examples/tsp-solver-crate.html"><strong aria-hidden="true">124.</strong> Case Study: aprender-tsp Sub-Crate</a></li><li class="chapter-item expanded "><a href="../examples/predator-prey-optimization.html"><strong aria-hidden="true">125.</strong> Case Study: Predator-Prey Optimization</a></li><li class="chapter-item expanded "><a href="../examples/dataframe-basics.html"><strong aria-hidden="true">126.</strong> Case Study: DataFrame Basics</a></li><li class="chapter-item expanded "><a href="../examples/data-preprocessing-scalers.html"><strong aria-hidden="true">127.</strong> Case Study: Data Preprocessing with Scalers</a></li><li class="chapter-item expanded "><a href="../examples/graph-social-network.html"><strong aria-hidden="true">128.</strong> Case Study: Graph Social Network</a></li><li class="chapter-item expanded "><a href="../examples/community-detection.html"><strong aria-hidden="true">129.</strong> Case Study: Community Detection with Louvain</a></li><li class="chapter-item expanded "><a href="../examples/graph-algorithms-comprehensive.html"><strong aria-hidden="true">130.</strong> Case Study: Comprehensive Graph Algorithms</a></li><li class="chapter-item expanded "><a href="../examples/descriptive-statistics.html"><strong aria-hidden="true">131.</strong> Case Study: Descriptive Statistics</a></li><li class="chapter-item expanded "><a href="../examples/bayesian-blocks-histogram.html"><strong aria-hidden="true">132.</strong> Case Study: Bayesian Blocks Histogram</a></li><li class="chapter-item expanded "><a href="../examples/pca-iris.html"><strong aria-hidden="true">133.</strong> Case Study: PCA Iris</a></li><li class="chapter-item expanded "><a href="../examples/isolation-forest-anomaly.html"><strong aria-hidden="true">134.</strong> Case Study: Isolation Forest Anomaly Detection</a></li><li class="chapter-item expanded "><a href="../examples/lof-anomaly.html"><strong aria-hidden="true">135.</strong> Case Study: Local Outlier Factor (LOF)</a></li><li class="chapter-item expanded "><a href="../examples/spectral-clustering.html"><strong aria-hidden="true">136.</strong> Case Study: Spectral Clustering</a></li><li class="chapter-item expanded "><a href="../examples/tsne-visualization.html"><strong aria-hidden="true">137.</strong> Case Study: t-SNE Visualization</a></li><li class="chapter-item expanded "><a href="../examples/market-basket-apriori.html"><strong aria-hidden="true">138.</strong> Case Study: Market Basket Analysis (Apriori)</a></li><li class="chapter-item expanded "><a href="../examples/time-series-forecasting.html"><strong aria-hidden="true">139.</strong> Case Study: ARIMA Time Series Forecasting</a></li><li class="chapter-item expanded "><a href="../examples/text-preprocessing.html"><strong aria-hidden="true">140.</strong> Case Study: Text Preprocessing for NLP</a></li><li class="chapter-item expanded "><a href="../examples/text-classification.html"><strong aria-hidden="true">141.</strong> Case Study: Text Classification with TF-IDF</a></li><li class="chapter-item expanded "><a href="../examples/chat-template.html"><strong aria-hidden="true">142.</strong> Case Study: Chat Templates for LLM Inference</a></li><li class="chapter-item expanded "><a href="../examples/advanced-nlp.html"><strong aria-hidden="true">143.</strong> Case Study: Advanced NLP (Similarity, Entities, Summarization)</a></li><li class="chapter-item expanded "><a href="../examples/xor-neural-network.html"><strong aria-hidden="true">144.</strong> Case Study: XOR Neural Network (Deep Learning)</a></li><li class="chapter-item expanded "><a href="../examples/xor-training.html"><strong aria-hidden="true">145.</strong> Case Study: XOR Training</a></li><li class="chapter-item expanded "><a href="../examples/neural-network-training.html"><strong aria-hidden="true">146.</strong> Case Study: Neural Network Training Pipeline</a></li><li class="chapter-item expanded "><a href="../examples/classification-training.html"><strong aria-hidden="true">147.</strong> Case Study: Classification Training</a></li><li class="chapter-item expanded "><a href="../examples/nlp-advanced.html"><strong aria-hidden="true">148.</strong> Case Study: Advanced NLP</a></li><li class="chapter-item expanded "><a href="../examples/topic-sentiment-analysis.html"><strong aria-hidden="true">149.</strong> Case Study: Topic & Sentiment Analysis</a></li><li class="chapter-item expanded "><a href="../examples/recommend-content.html"><strong aria-hidden="true">150.</strong> Case Study: Content-Based Recommendations</a></li><li class="chapter-item expanded "><a href="../examples/content-recommender.html"><strong aria-hidden="true">151.</strong> Case Study: Content-Based Recommender System</a></li><li class="chapter-item expanded "><a href="../examples/shell-completion.html"><strong aria-hidden="true">152.</strong> Case Study: AI Shell Completion</a></li><li class="chapter-item expanded "><a href="../examples/shell-completion-benchmarks.html"><strong aria-hidden="true">153.</strong> Case Study: Shell Completion Benchmarks</a></li><li class="chapter-item expanded "><a href="../examples/shell-hf-hub-publishing.html"><strong aria-hidden="true">154.</strong> Case Study: Publishing Shell Models to HF Hub</a></li><li class="chapter-item expanded "><a href="../examples/shell-encryption-tiers.html"><strong aria-hidden="true">155.</strong> Case Study: Model Encryption Tiers</a></li><li class="chapter-item expanded "><a href="../examples/shell-encryption-demo.html"><strong aria-hidden="true">156.</strong> Case Study: Shell Encryption Demo</a></li><li class="chapter-item expanded "><a href="../examples/shell-homomorphic-encryption.html"><strong aria-hidden="true">157.</strong> Case Study: Shell Homomorphic Encryption</a></li><li class="chapter-item expanded "><a href="../examples/shell-model-format.html"><strong aria-hidden="true">158.</strong> Case Study: Shell Model Format</a></li><li class="chapter-item expanded "><a href="../examples/mixture-of-experts.html"><strong aria-hidden="true">159.</strong> Case Study: Mixture of Experts (MoE)</a></li><li class="chapter-item expanded "><a href="../examples/shell-history-developer-guide.html"><strong aria-hidden="true">160.</strong> Developer's Guide: Shell History Models</a></li><li class="chapter-item expanded "><a href="../examples/custom-error-classifier.html"><strong aria-hidden="true">161.</strong> Building Custom Error Classifiers</a></li><li class="chapter-item expanded "><a href="../examples/citl-automated-repair.html"><strong aria-hidden="true">162.</strong> Case Study: CITL Automated Program Repair</a></li><li class="chapter-item expanded "><a href="../examples/batuta-integration.html"><strong aria-hidden="true">163.</strong> Case Study: Batuta - Automated Migration to Aprender</a></li><li class="chapter-item expanded "><a href="../examples/online-learning.html"><strong aria-hidden="true">164.</strong> Case Study: Online Learning and Dynamic Retraining</a></li><li class="chapter-item expanded "><a href="../examples/apr-loading-modes.html"><strong aria-hidden="true">165.</strong> Case Study: APR Loading Modes</a></li><li class="chapter-item expanded "><a href="../examples/apr-inspection.html"><strong aria-hidden="true">166.</strong> Case Study: APR Model Inspection</a></li><li class="chapter-item expanded "><a href="../examples/apr-scoring.html"><strong aria-hidden="true">167.</strong> Case Study: APR 100-Point Quality Scoring</a></li><li class="chapter-item expanded "><a href="../examples/poka-yoke-validation.html"><strong aria-hidden="true">168.</strong> Case Study: APR Poka-Yoke Validation</a></li><li class="chapter-item expanded "><a href="../examples/apr-cache.html"><strong aria-hidden="true">169.</strong> Case Study: APR Model Cache</a></li><li class="chapter-item expanded "><a href="../examples/apr-embed.html"><strong aria-hidden="true">170.</strong> Case Study: APR Data Embedding</a></li><li class="chapter-item expanded "><a href="../examples/apr-with-metadata.html"><strong aria-hidden="true">171.</strong> Case Study: APR with JSON Metadata</a></li><li class="chapter-item expanded "><a href="../examples/cuda-backend.html"><strong aria-hidden="true">172.</strong> Case Study: CUDA and GPU Backends</a></li><li class="chapter-item expanded "><a href="../examples/trueno-compute-integration.html"><strong aria-hidden="true">173.</strong> Case Study: Trueno Compute Integration</a></li><li class="chapter-item expanded "><a href="../examples/apr-cli-demo.html"><strong aria-hidden="true">174.</strong> Case Study: APR CLI Tool Demo</a></li><li class="chapter-item expanded "><a href="../examples/create-test-apr.html"><strong aria-hidden="true">175.</strong> Case Study: Create Test APR Files</a></li><li class="chapter-item expanded "><a href="../examples/apr-cli-commands.html"><strong aria-hidden="true">176.</strong> Case Study: APR CLI Commands Demo</a></li><li class="chapter-item expanded "><a href="../examples/model-zoo.html"><strong aria-hidden="true">177.</strong> Case Study: Model Zoo</a></li><li class="chapter-item expanded "><a href="../examples/sovereign-stack.html"><strong aria-hidden="true">178.</strong> Case Study: Sovereign AI Stack Integration</a></li><li class="chapter-item expanded "><a href="../examples/sovereign-offline.html"><strong aria-hidden="true">179.</strong> Case Study: Sovereign AI Offline Mode</a></li><li class="chapter-item expanded "><a href="../examples/explainability-audit.html"><strong aria-hidden="true">180.</strong> Case Study: Model Explainability and Audit Trails</a></li><li class="chapter-item expanded "><a href="../examples/model-serving.html"><strong aria-hidden="true">181.</strong> Case Study: Model Serving</a></li><li class="chapter-item expanded "><a href="../examples/federation-gateway.html"><strong aria-hidden="true">182.</strong> Case Study: Federation Gateway</a></li><li class="chapter-item expanded "><a href="../examples/federation-routing.html"><strong aria-hidden="true">183.</strong> Case Study: Federation Routing Policies</a></li><li class="chapter-item expanded "><a href="../examples/probar-tui-testing.html"><strong aria-hidden="true">184.</strong> Case Study: Probar TUI Testing</a></li><li class="chapter-item expanded "><a href="../examples/pipeline-verification.html"><strong aria-hidden="true">185.</strong> Case Study: Pipeline Verification</a></li><li class="chapter-item expanded "><a href="../examples/state-machine-playbooks.html"><strong aria-hidden="true">186.</strong> Case Study: State Machine Playbooks</a></li><li class="chapter-item expanded "><a href="../examples/tensorlogic-reasoning.html"><strong aria-hidden="true">187.</strong> Case Study: TensorLogic Neuro-Symbolic Reasoning</a></li><li class="chapter-item expanded "><a href="../examples/audio-mel-spectrogram.html"><strong aria-hidden="true">188.</strong> Case Study: Audio Mel Spectrogram Processing</a></li><li class="chapter-item expanded "><a href="../examples/monte-carlo-simulation.html"><strong aria-hidden="true">189.</strong> Case Study: Monte Carlo Financial Simulation</a></li><li class="chapter-item expanded "><a href="../examples/autograd-training.html"><strong aria-hidden="true">190.</strong> Case Study: Automatic Differentiation Training</a></li><li class="chapter-item expanded "><a href="../examples/gnn-node-classification.html"><strong aria-hidden="true">191.</strong> Case Study: Graph Neural Networks</a></li><li class="chapter-item expanded "><a href="../examples/pruning-magnitude.html"><strong aria-hidden="true">192.</strong> Case Study: Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../examples/lottery-ticket-pruning.html"><strong aria-hidden="true">193.</strong> Case Study: Lottery Ticket Pruning</a></li><li class="chapter-item expanded "><a href="../examples/bench-comparison.html"><strong aria-hidden="true">194.</strong> Case Study: Benchmark Comparison</a></li><li class="chapter-item expanded "><a href="../examples/showcase-benchmark.html"><strong aria-hidden="true">195.</strong> Case Study: Showcase Benchmark</a></li><li class="chapter-item expanded "><a href="../examples/qa-falsification.html"><strong aria-hidden="true">196.</strong> Case Study: QA Falsification Protocol</a></li><li class="chapter-item expanded "><a href="../examples/qwen-qa-playbook.html"><strong aria-hidden="true">197.</strong> Case Study: Qwen2.5-Coder QA Playbook</a></li><li class="chapter-item expanded "><a href="../examples/ptx-parity-validation.html"><strong aria-hidden="true">198.</strong> Case Study: PTX Parity Validation (GH-219)</a></li><li class="chapter-item expanded "><a href="../examples/hex-forensics.html"><strong aria-hidden="true">199.</strong> Case Study: Hex Forensics — Binary Model Inspection</a></li><li class="chapter-item expanded "><a href="../examples/rosetta-stone.html"><strong aria-hidden="true">200.</strong> Case Study: Rosetta Stone — Universal Format Converter</a></li><li class="chapter-item expanded "><a href="../examples/validated-tensors.html"><strong aria-hidden="true">201.</strong> Case Study: Validated Tensors — Compile-Time Contracts</a></li><li class="chapter-item expanded "><a href="../examples/qwen-inference.html"><strong aria-hidden="true">202.</strong> Case Study: Qwen Inference with realizar</a></li><li class="chapter-item expanded "><a href="../examples/sharded-safetensors-serve.html"><strong aria-hidden="true">203.</strong> Case Study: Sharded SafeTensors Serving (GH-213)</a></li><li class="chapter-item expanded "><a href="../examples/model-merge-strategies.html"><strong aria-hidden="true">204.</strong> Case Study: Model Merge Strategies (GH-245)</a></li><li class="chapter-item expanded affix "><li class="part-title">Sprint-Based Development</li><li class="chapter-item expanded "><a href="../sprints/sprint-planning.html"><strong aria-hidden="true">205.</strong> Sprint Planning</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-execution.html"><strong aria-hidden="true">206.</strong> Sprint Execution</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-review.html"><strong aria-hidden="true">207.</strong> Sprint Review</a></li><li class="chapter-item expanded "><a href="../sprints/sprint-retrospective.html"><strong aria-hidden="true">208.</strong> Sprint Retrospective</a></li><li class="chapter-item expanded "><a href="../sprints/issue-management.html"><strong aria-hidden="true">209.</strong> Issue Management</a></li><li class="chapter-item expanded affix "><li class="part-title">Anti-Hallucination Enforcement</li><li class="chapter-item expanded "><a href="../anti-hallucination/test-backed-examples.html"><strong aria-hidden="true">210.</strong> Test-Backed Examples</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/example-verification.html"><strong aria-hidden="true">211.</strong> Example Verification</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/ci-validation.html"><strong aria-hidden="true">212.</strong> CI Validation</a></li><li class="chapter-item expanded "><a href="../anti-hallucination/documentation-testing.html"><strong aria-hidden="true">213.</strong> Documentation Testing</a></li><li class="chapter-item expanded affix "><li class="part-title">Tools and Setup</li><li class="chapter-item expanded "><a href="../tools/development-environment.html"><strong aria-hidden="true">214.</strong> Development Environment</a></li><li class="chapter-item expanded "><a href="../tools/cargo-test.html"><strong aria-hidden="true">215.</strong> cargo test</a></li><li class="chapter-item expanded "><a href="../tools/cargo-clippy.html"><strong aria-hidden="true">216.</strong> cargo clippy</a></li><li class="chapter-item expanded "><a href="../tools/cargo-fmt.html"><strong aria-hidden="true">217.</strong> cargo fmt</a></li><li class="chapter-item expanded "><a href="../tools/cargo-mutants.html"><strong aria-hidden="true">218.</strong> cargo mutants</a></li><li class="chapter-item expanded "><a href="../tools/proptest.html"><strong aria-hidden="true">219.</strong> proptest</a></li><li class="chapter-item expanded "><a href="../tools/criterion.html"><strong aria-hidden="true">220.</strong> criterion</a></li><li class="chapter-item expanded "><a href="../tools/pmat.html"><strong aria-hidden="true">221.</strong> pmat (Toyota AI Toolkit)</a></li><li class="chapter-item expanded "><a href="../tools/apr-cli.html"><strong aria-hidden="true">222.</strong> apr (APR Model Operations CLI)</a></li><li class="chapter-item expanded "><a href="../tools/apr-spec.html"><strong aria-hidden="true">223.</strong> APR Format Specification</a></li><li class="chapter-item expanded affix "><li class="part-title">Best Practices</li><li class="chapter-item expanded "><a href="../best-practices/error-handling.html"><strong aria-hidden="true">224.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../best-practices/api-design.html"><strong aria-hidden="true">225.</strong> API Design</a></li><li class="chapter-item expanded "><a href="../best-practices/builder-pattern.html"><strong aria-hidden="true">226.</strong> Builder Pattern</a></li><li class="chapter-item expanded "><a href="../best-practices/type-safety.html"><strong aria-hidden="true">227.</strong> Type Safety</a></li><li class="chapter-item expanded "><a href="../best-practices/performance.html"><strong aria-hidden="true">228.</strong> Performance Considerations</a></li><li class="chapter-item expanded "><a href="../best-practices/documentation-standards.html"><strong aria-hidden="true">229.</strong> Documentation Standards</a></li><li class="chapter-item expanded affix "><li class="part-title">Metrics and Measurement</li><li class="chapter-item expanded "><a href="../metrics/test-coverage.html"><strong aria-hidden="true">230.</strong> Test Coverage</a></li><li class="chapter-item expanded "><a href="../metrics/mutation-score.html"><strong aria-hidden="true">231.</strong> Mutation Score</a></li><li class="chapter-item expanded "><a href="../metrics/cyclomatic-complexity.html"><strong aria-hidden="true">232.</strong> Cyclomatic Complexity</a></li><li class="chapter-item expanded "><a href="../metrics/code-churn.html"><strong aria-hidden="true">233.</strong> Code Churn</a></li><li class="chapter-item expanded "><a href="../metrics/build-times.html"><strong aria-hidden="true">234.</strong> Build Times</a></li><li class="chapter-item expanded "><a href="../metrics/tdg-breakdown.html"><strong aria-hidden="true">235.</strong> TDG Score Breakdown</a></li><li class="chapter-item expanded affix "><li class="part-title">Common Pitfalls</li><li class="chapter-item expanded "><a href="../pitfalls/skipping-tests.html"><strong aria-hidden="true">236.</strong> Skipping Tests</a></li><li class="chapter-item expanded "><a href="../pitfalls/insufficient-coverage.html"><strong aria-hidden="true">237.</strong> Insufficient Test Coverage</a></li><li class="chapter-item expanded "><a href="../pitfalls/ignoring-warnings.html"><strong aria-hidden="true">238.</strong> Ignoring Warnings</a></li><li class="chapter-item expanded "><a href="../pitfalls/over-mocking.html"><strong aria-hidden="true">239.</strong> Over-Mocking</a></li><li class="chapter-item expanded "><a href="../pitfalls/flaky-tests.html"><strong aria-hidden="true">240.</strong> Flaky Tests</a></li><li class="chapter-item expanded "><a href="../pitfalls/technical-debt.html"><strong aria-hidden="true">241.</strong> Technical Debt Accumulation</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../appendix/glossary.html"><strong aria-hidden="true">242.</strong> Glossary</a></li><li class="chapter-item expanded "><a href="../appendix/references.html"><strong aria-hidden="true">243.</strong> References</a></li><li class="chapter-item expanded "><a href="../appendix/further-reading.html"><strong aria-hidden="true">244.</strong> Further Reading</a></li><li class="chapter-item expanded "><a href="../appendix/contributing.html"><strong aria-hidden="true">245.</strong> Contributing to This Book</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">EXTREME TDD - The Aprender Guide to Zero-Defect Machine Learning</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/aprender" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/aprender/edit/main/book/src/ml-fundamentals/feature-scaling.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="feature-scaling-theory"><a class="header" href="#feature-scaling-theory">Feature Scaling Theory</a></h1>
+<p>Feature scaling is a critical preprocessing step that transforms features to similar scales. Proper scaling dramatically improves convergence speed and model performance, especially for distance-based algorithms and gradient descent optimization.</p>
+<h2 id="why-feature-scaling-matters"><a class="header" href="#why-feature-scaling-matters">Why Feature Scaling Matters</a></h2>
+<h3 id="problem-features-on-different-scales"><a class="header" href="#problem-features-on-different-scales">Problem: Features on Different Scales</a></h3>
+<p>Consider a dataset with two features:</p>
+<pre><code>Feature 1 (salary):    [30,000, 50,000, 80,000, 120,000]  Range: 90,000
+Feature 2 (age):       [25, 30, 35, 40]                    Range: 15
+</code></pre>
+<p><strong>Issue</strong>: Salary values are ~6000x larger than age values!</p>
+<h3 id="impact-on-machine-learning-algorithms"><a class="header" href="#impact-on-machine-learning-algorithms">Impact on Machine Learning Algorithms</a></h3>
+<h4 id="1-gradient-descent"><a class="header" href="#1-gradient-descent">1. Gradient Descent</a></h4>
+<p>Without scaling, loss surface becomes elongated:</p>
+<pre><code>Unscaled Loss Surface:
+           θ₁ (salary coefficient)
+           ↑
+      1000 ┤●
+       800 ┤ ●
+       600 ┤  ●
+       400 ┤   ●  ← Very elongated
+       200 ┤    ●●●●●●●●●●●●●●●●●
+         0 └────────────────────────→
+                 θ₂ (age coefficient)
+
+Problem: Gradient descent takes tiny steps in θ₁ direction,
+         large steps in θ₂ direction → zig-zagging, slow convergence
+</code></pre>
+<p>With scaling, loss surface becomes circular:</p>
+<pre><code>Scaled Loss Surface:
+           θ₁
+           ↑
+      1.0 ┤
+      0.8 ┤    ●●●
+      0.6 ┤  ●     ●  ← Circular contours
+      0.4 ┤ ●   ✖   ●  (✖ = optimal)
+      0.2 ┤  ●     ●
+      0.0 └───●●●─────→
+                θ₂
+
+Result: Gradient descent takes efficient path to minimum
+</code></pre>
+<p><strong>Convergence speed</strong>: Scaling can improve training time by <strong>10-100x</strong>!</p>
+<h4 id="2-distance-based-algorithms-k-nn-k-means-svm"><a class="header" href="#2-distance-based-algorithms-k-nn-k-means-svm">2. Distance-Based Algorithms (K-NN, K-Means, SVM)</a></h4>
+<p>Euclidean distance formula:</p>
+<pre><code>d = √((x₁-y₁)² + (x₂-y₂)²)
+</code></pre>
+<p>With unscaled features:</p>
+<pre><code>Sample A: (salary=50000, age=30)
+Sample B: (salary=51000, age=35)
+
+Distance = √((51000-50000)² + (35-30)²)
+         = √(1000² + 5²)
+         = √(1,000,000 + 25)
+         = √1,000,025
+         ≈ 1000.01
+
+Contribution to distance:
+  Salary: 1,000,000 / 1,000,025 ≈ 99.997%
+  Age:           25 / 1,000,025 ≈  0.003%
+</code></pre>
+<p><strong>Problem</strong>: Age is completely ignored! K-NN makes decisions based solely on salary.</p>
+<p>With scaled features (both in range [0, 1]):</p>
+<pre><code>Scaled A: (0.2, 0.33)
+Scaled B: (0.3, 0.67)
+
+Distance = √((0.3-0.2)² + (0.67-0.33)²)
+         = √(0.01 + 0.1156)
+         = √0.1256
+         ≈ 0.354
+
+Contribution to distance:
+  Salary: 0.01 / 0.1256 ≈ 8%
+  Age:   0.1156 / 0.1256 ≈ 92%
+</code></pre>
+<p><strong>Result</strong>: Both features contribute meaningfully to distance calculation.</p>
+<h2 id="scaling-methods"><a class="header" href="#scaling-methods">Scaling Methods</a></h2>
+<h3 id="comparison-table"><a class="header" href="#comparison-table">Comparison Table</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Method</th><th>Formula</th><th>Range</th><th>Best For</th><th>Outlier Sensitive</th></tr></thead><tbody>
+<tr><td><strong>StandardScaler</strong></td><td>(x - μ) / σ</td><td>Unbounded, ~[-3, 3]</td><td>Normal distributions</td><td>Low</td></tr>
+<tr><td><strong>MinMaxScaler</strong></td><td>(x - min) / (max - min)</td><td>[0, 1] or custom</td><td>Known bounds needed</td><td>High</td></tr>
+<tr><td><strong>RobustScaler</strong></td><td>(x - median) / IQR</td><td>Unbounded</td><td>Data with outliers</td><td>Low</td></tr>
+<tr><td><strong>MaxAbsScaler</strong></td><td>x / |max|</td><td>[-1, 1]</td><td>Sparse data, preserves zeros</td><td>High</td></tr>
+<tr><td><strong>Normalization (L2)</strong></td><td>x / ‖x‖₂</td><td>Unit sphere</td><td>Text, TF-IDF vectors</td><td>N/A</td></tr>
+</tbody></table>
+</div>
+<h2 id="standardscaler-z-score-normalization"><a class="header" href="#standardscaler-z-score-normalization">StandardScaler: Z-Score Normalization</a></h2>
+<p><strong>Key idea</strong>: Center data at zero, scale by standard deviation.</p>
+<h3 id="formula"><a class="header" href="#formula">Formula</a></h3>
+<pre><code>x' = (x - μ) / σ
+
+Where:
+  μ = mean of feature
+  σ = standard deviation of feature
+</code></pre>
+<h3 id="properties"><a class="header" href="#properties">Properties</a></h3>
+<p>After standardization:</p>
+<ul>
+<li><strong>Mean = 0</strong></li>
+<li><strong>Standard deviation = 1</strong></li>
+<li>Distribution shape preserved</li>
+</ul>
+<h3 id="algorithm"><a class="header" href="#algorithm">Algorithm</a></h3>
+<pre><code>1. Fit phase (training data):
+   μ = (1/N) Σ xᵢ                    // Compute mean
+   σ = √[(1/N) Σ (xᵢ - μ)²]          // Compute std
+
+2. Transform phase:
+   x'ᵢ = (xᵢ - μ) / σ                // Scale each sample
+
+3. Inverse transform (optional):
+   xᵢ = x'ᵢ × σ + μ                  // Recover original scale
+</code></pre>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
+<pre><code>Original data: [1, 2, 3, 4, 5]
+
+Step 1: Compute statistics
+  μ = (1+2+3+4+5) / 5 = 3
+  σ = √[(1-3)² + (2-3)² + (3-3)² + (4-3)² + (5-3)²] / 5
+    = √[4 + 1 + 0 + 1 + 4] / 5
+    = √2 ≈ 1.414
+
+Step 2: Transform
+  x'₁ = (1 - 3) / 1.414 = -1.414
+  x'₂ = (2 - 3) / 1.414 = -0.707
+  x'₃ = (3 - 3) / 1.414 =  0.000
+  x'₄ = (4 - 3) / 1.414 =  0.707
+  x'₅ = (5 - 3) / 1.414 =  1.414
+
+Result: [-1.414, -0.707, 0.000, 0.707, 1.414]
+  Mean = 0, Std = 1 ✓
+</code></pre>
+<h3 id="aprender-implementation"><a class="header" href="#aprender-implementation">aprender Implementation</a></h3>
+<pre><code class="language-rust">use aprender::preprocessing::StandardScaler;
+use aprender::primitives::Matrix;
+
+// Create scaler
+let mut scaler = StandardScaler::new();
+
+// Fit on training data
+scaler.fit(&amp;x_train)?;
+
+// Transform training and test data
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;
+
+// Access learned statistics
+println!(&quot;Mean: {:?}&quot;, scaler.mean());
+println!(&quot;Std:  {:?}&quot;, scaler.std());
+
+// Inverse transform (recover original scale)
+let x_recovered = scaler.inverse_transform(&amp;x_train_scaled)?;</code></pre>
+<h3 id="advantages"><a class="header" href="#advantages">Advantages</a></h3>
+<ol>
+<li><strong>Robust to outliers</strong>: Outliers affect mean/std less than min/max</li>
+<li><strong>Maintains distribution shape</strong>: Useful for normally distributed data</li>
+<li><strong>Unbounded output</strong>: Can handle values outside training range</li>
+<li><strong>Interpretable</strong>: &quot;How many standard deviations from the mean?&quot;</li>
+</ol>
+<h3 id="disadvantages"><a class="header" href="#disadvantages">Disadvantages</a></h3>
+<ol>
+<li><strong>Assumes normality</strong>: Less effective for heavily skewed distributions</li>
+<li><strong>Unbounded range</strong>: Output not in [0, 1] if that's required</li>
+<li><strong>Outliers still affect</strong>: Mean and std sensitive to extreme values</li>
+</ol>
+<h3 id="when-to-use"><a class="header" href="#when-to-use">When to Use</a></h3>
+<p>✅ <strong>Use StandardScaler for</strong>:</p>
+<ul>
+<li>Features with approximately normal distribution</li>
+<li>Gradient-based optimization (neural networks, logistic regression)</li>
+<li>SVM with RBF kernel</li>
+<li>PCA (Principal Component Analysis)</li>
+<li>Data with moderate outliers</li>
+</ul>
+<p>❌ <strong>Avoid StandardScaler for</strong>:</p>
+<ul>
+<li>Need strict [0, 1] bounds (use MinMaxScaler)</li>
+<li>Heavy outliers (use RobustScaler)</li>
+<li>Sparse data with many zeros (use MaxAbsScaler)</li>
+</ul>
+<h2 id="minmaxscaler-range-normalization"><a class="header" href="#minmaxscaler-range-normalization">MinMaxScaler: Range Normalization</a></h2>
+<p><strong>Key idea</strong>: Scale features to a fixed range, typically [0, 1].</p>
+<h3 id="formula-1"><a class="header" href="#formula-1">Formula</a></h3>
+<pre><code>x' = (x - min) / (max - min)           // Scale to [0, 1]
+
+x' = a + (x - min) × (b - a) / (max - min)  // Scale to [a, b]
+</code></pre>
+<h3 id="properties-1"><a class="header" href="#properties-1">Properties</a></h3>
+<p>After min-max scaling to [0, 1]:</p>
+<ul>
+<li><strong>Minimum value → 0</strong></li>
+<li><strong>Maximum value → 1</strong></li>
+<li>Linear transformation (preserves relationships)</li>
+</ul>
+<h3 id="algorithm-1"><a class="header" href="#algorithm-1">Algorithm</a></h3>
+<pre><code>1. Fit phase (training data):
+   min = minimum value in feature
+   max = maximum value in feature
+   range = max - min
+
+2. Transform phase:
+   x'ᵢ = (xᵢ - min) / range
+
+3. Inverse transform:
+   xᵢ = x'ᵢ × range + min
+</code></pre>
+<h3 id="example-1"><a class="header" href="#example-1">Example</a></h3>
+<pre><code>Original data: [10, 20, 30, 40, 50]
+
+Step 1: Compute range
+  min = 10
+  max = 50
+  range = 50 - 10 = 40
+
+Step 2: Transform to [0, 1]
+  x'₁ = (10 - 10) / 40 = 0.00
+  x'₂ = (20 - 10) / 40 = 0.25
+  x'₃ = (30 - 10) / 40 = 0.50
+  x'₄ = (40 - 10) / 40 = 0.75
+  x'₅ = (50 - 10) / 40 = 1.00
+
+Result: [0.00, 0.25, 0.50, 0.75, 1.00]
+  Min = 0, Max = 1 ✓
+</code></pre>
+<h3 id="custom-range-example"><a class="header" href="#custom-range-example">Custom Range Example</a></h3>
+<p>Scale to [-1, 1] for neural networks with tanh activation:</p>
+<pre><code>Original: [10, 20, 30, 40, 50]
+Range: [min=10, max=50]
+
+Formula: x' = -1 + (x - 10) × 2 / 40
+
+Result:
+  10 → -1.0
+  20 → -0.5
+  30 →  0.0
+  40 →  0.5
+  50 →  1.0
+</code></pre>
+<h3 id="aprender-implementation-1"><a class="header" href="#aprender-implementation-1">aprender Implementation</a></h3>
+<pre><code class="language-rust">use aprender::preprocessing::MinMaxScaler;
+
+// Scale to [0, 1] (default)
+let mut scaler = MinMaxScaler::new();
+
+// Scale to custom range [-1, 1]
+let mut scaler = MinMaxScaler::new()
+    .with_range(-1.0, 1.0);
+
+// Fit and transform
+scaler.fit(&amp;x_train)?;
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;
+
+// Access learned parameters
+println!(&quot;Data min: {:?}&quot;, scaler.data_min());
+println!(&quot;Data max: {:?}&quot;, scaler.data_max());
+
+// Inverse transform
+let x_recovered = scaler.inverse_transform(&amp;x_train_scaled)?;</code></pre>
+<h3 id="advantages-1"><a class="header" href="#advantages-1">Advantages</a></h3>
+<ol>
+<li><strong>Bounded output</strong>: Guaranteed range [0, 1] or custom</li>
+<li><strong>Preserves zero</strong>: If data contains zeros, they remain zeros</li>
+<li><strong>Interpretable</strong>: &quot;What percentage of the range?&quot;</li>
+<li><strong>No assumptions</strong>: Works with any distribution</li>
+</ol>
+<h3 id="disadvantages-1"><a class="header" href="#disadvantages-1">Disadvantages</a></h3>
+<ol>
+<li><strong>Sensitive to outliers</strong>: Single extreme value affects entire scaling</li>
+<li><strong>Bounded by training data</strong>: Test values outside [train_min, train_max] → outside [0, 1]</li>
+<li><strong>Distorts distribution</strong>: Outliers compress main data range</li>
+</ol>
+<h3 id="when-to-use-1"><a class="header" href="#when-to-use-1">When to Use</a></h3>
+<p>✅ <strong>Use MinMaxScaler for</strong>:</p>
+<ul>
+<li>Neural networks with sigmoid/tanh activation</li>
+<li>Bounded features needed (e.g., image pixels)</li>
+<li>No outliers present</li>
+<li>Features with known bounds</li>
+<li>When interpretability as &quot;percentage&quot; is useful</li>
+</ul>
+<p>❌ <strong>Avoid MinMaxScaler for</strong>:</p>
+<ul>
+<li>Data with outliers (they compress everything else)</li>
+<li>Test data may have values outside training range</li>
+<li>Need to preserve distribution shape</li>
+</ul>
+<h2 id="outlier-handling-comparison"><a class="header" href="#outlier-handling-comparison">Outlier Handling Comparison</a></h2>
+<h3 id="dataset-with-outlier"><a class="header" href="#dataset-with-outlier">Dataset with Outlier</a></h3>
+<pre><code>Data: [1, 2, 3, 4, 5, 100]  ← 100 is an outlier
+</code></pre>
+<h3 id="standardscaler-less-affected"><a class="header" href="#standardscaler-less-affected">StandardScaler (Less Affected)</a></h3>
+<pre><code>μ = (1+2+3+4+5+100) / 6 ≈ 19.17
+σ ≈ 37.85
+
+Scaled:
+  1   → (1-19.17)/37.85  ≈ -0.48
+  2   → (2-19.17)/37.85  ≈ -0.45
+  3   → (3-19.17)/37.85  ≈ -0.43
+  4   → (4-19.17)/37.85  ≈ -0.40
+  5   → (5-19.17)/37.85  ≈ -0.37
+  100 → (100-19.17)/37.85 ≈ 2.14
+
+Main data: [-0.48 to -0.37]  (range ≈ 0.11)
+Outlier: 2.14
+</code></pre>
+<p><strong>Effect</strong>: Outlier shifted but main data still usable, relatively compressed.</p>
+<h3 id="minmaxscaler-heavily-affected"><a class="header" href="#minmaxscaler-heavily-affected">MinMaxScaler (Heavily Affected)</a></h3>
+<pre><code>min = 1, max = 100, range = 99
+
+Scaled:
+  1   → (1-1)/99   = 0.000
+  2   → (2-1)/99   = 0.010
+  3   → (3-1)/99   = 0.020
+  4   → (4-1)/99   = 0.030
+  5   → (5-1)/99   = 0.040
+  100 → (100-1)/99 = 1.000
+
+Main data: [0.000 to 0.040]  (compressed to 4% of range!)
+Outlier: 1.000
+</code></pre>
+<p><strong>Effect</strong>: Outlier uses 96% of range, main data compressed to tiny interval.</p>
+<p><strong>Lesson</strong>: Use StandardScaler or RobustScaler when outliers are present!</p>
+<h2 id="when-to-scale-features"><a class="header" href="#when-to-scale-features">When to Scale Features</a></h2>
+<h3 id="algorithms-that-require-scaling"><a class="header" href="#algorithms-that-require-scaling">Algorithms That REQUIRE Scaling</a></h3>
+<p>These algorithms <strong>fail or perform poorly</strong> without scaling:</p>
+<div class="table-wrapper"><table><thead><tr><th>Algorithm</th><th>Why Scaling Needed</th></tr></thead><tbody>
+<tr><td><strong>K-Nearest Neighbors</strong></td><td>Distance calculation dominated by large-scale features</td></tr>
+<tr><td><strong>K-Means Clustering</strong></td><td>Centroid calculation uses Euclidean distance</td></tr>
+<tr><td><strong>Support Vector Machines</strong></td><td>Distance to hyperplane affected by feature scales</td></tr>
+<tr><td><strong>Principal Component Analysis</strong></td><td>Variance calculation dominated by large-scale features</td></tr>
+<tr><td><strong>Gradient Descent</strong></td><td>Elongated loss surface causes slow convergence</td></tr>
+<tr><td><strong>Neural Networks</strong></td><td>Weights initialized for similar input scales</td></tr>
+<tr><td><strong>Logistic Regression</strong></td><td>Gradient descent convergence issues</td></tr>
+</tbody></table>
+</div>
+<h3 id="algorithms-that-dont-need-scaling"><a class="header" href="#algorithms-that-dont-need-scaling">Algorithms That DON'T Need Scaling</a></h3>
+<p>These algorithms are <strong>scale-invariant</strong>:</p>
+<div class="table-wrapper"><table><thead><tr><th>Algorithm</th><th>Why Scaling Not Needed</th></tr></thead><tbody>
+<tr><td><strong>Decision Trees</strong></td><td>Splits based on thresholds, not distances</td></tr>
+<tr><td><strong>Random Forests</strong></td><td>Ensemble of decision trees</td></tr>
+<tr><td><strong>Gradient Boosting</strong></td><td>Based on decision trees</td></tr>
+<tr><td><strong>Naive Bayes</strong></td><td>Works with probability distributions</td></tr>
+</tbody></table>
+</div>
+<p><strong>Exception</strong>: Even for tree-based models, scaling can help if using regularization or mixed with other algorithms.</p>
+<h2 id="critical-workflow-rules"><a class="header" href="#critical-workflow-rules">Critical Workflow Rules</a></h2>
+<h3 id="rule-1-fit-on-training-data-only"><a class="header" href="#rule-1-fit-on-training-data-only">Rule 1: Fit on Training Data ONLY</a></h3>
+<pre><code class="language-rust">// ❌ WRONG: Fitting on all data leaks information
+scaler.fit(&amp;x_all)?;
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;
+
+// ✅ CORRECT: Fit only on training data
+scaler.fit(&amp;x_train)?;  // Learn μ, σ from training only
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;  // Apply same μ, σ</code></pre>
+<p><strong>Why?</strong> Fitting on test data creates <strong>data leakage</strong>:</p>
+<ul>
+<li>Test set statistics influence scaling</li>
+<li>Model indirectly &quot;sees&quot; test data during training</li>
+<li>Overly optimistic performance estimates</li>
+<li>Fails in production (new data has different statistics)</li>
+</ul>
+<h3 id="rule-2-same-scaler-for-train-and-test"><a class="header" href="#rule-2-same-scaler-for-train-and-test">Rule 2: Same Scaler for Train and Test</a></h3>
+<pre><code class="language-rust">// ❌ WRONG: Different scalers
+let mut train_scaler = StandardScaler::new();
+train_scaler.fit(&amp;x_train)?;
+let x_train_scaled = train_scaler.transform(&amp;x_train)?;
+
+let mut test_scaler = StandardScaler::new();
+test_scaler.fit(&amp;x_test)?;  // ← WRONG! Different statistics
+let x_test_scaled = test_scaler.transform(&amp;x_test)?;
+
+// ✅ CORRECT: Same scaler
+let mut scaler = StandardScaler::new();
+scaler.fit(&amp;x_train)?;
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;  // Same statistics</code></pre>
+<h3 id="rule-3-scale-before-splitting-no"><a class="header" href="#rule-3-scale-before-splitting-no">Rule 3: Scale Before Splitting? NO!</a></h3>
+<pre><code class="language-rust">// ❌ WRONG: Scale before train/test split
+scaler.fit(&amp;x_all)?;
+let x_scaled = scaler.transform(&amp;x_all)?;
+let (x_train, x_test, ...) = train_test_split(&amp;x_scaled, ...)?;
+
+// ✅ CORRECT: Split before scaling
+let (x_train, x_test, ...) = train_test_split(&amp;x, ...)?;
+scaler.fit(&amp;x_train)?;
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+let x_test_scaled = scaler.transform(&amp;x_test)?;</code></pre>
+<h3 id="rule-4-save-scaler-for-production"><a class="header" href="#rule-4-save-scaler-for-production">Rule 4: Save Scaler for Production</a></h3>
+<pre><code class="language-rust">// Training phase
+let mut scaler = StandardScaler::new();
+scaler.fit(&amp;x_train)?;
+
+// Save scaler parameters
+let scaler_params = ScalerParams {
+    mean: scaler.mean().clone(),
+    std: scaler.std().clone(),
+};
+save_to_disk(&amp;scaler_params, &quot;scaler.json&quot;)?;
+
+// Production phase (months later)
+let scaler_params = load_from_disk(&quot;scaler.json&quot;)?;
+let mut scaler = StandardScaler::from_params(scaler_params);
+let x_new_scaled = scaler.transform(&amp;x_new)?;</code></pre>
+<h2 id="feature-specific-scaling-strategies"><a class="header" href="#feature-specific-scaling-strategies">Feature-Specific Scaling Strategies</a></h2>
+<h3 id="numerical-features"><a class="header" href="#numerical-features">Numerical Features</a></h3>
+<p><strong>Continuous variables</strong> (age, salary, temperature):</p>
+<ul>
+<li>StandardScaler if approximately normal</li>
+<li>MinMaxScaler if bounded and no outliers</li>
+<li>RobustScaler if outliers present</li>
+</ul>
+<h3 id="binary-features-01"><a class="header" href="#binary-features-01">Binary Features (0/1)</a></h3>
+<p><strong>No scaling needed!</strong></p>
+<pre><code>Original: [0, 1, 0, 1, 1]  ← Already in [0, 1]
+
+Don't scale: Breaks semantic meaning (presence/absence)
+</code></pre>
+<h3 id="count-features"><a class="header" href="#count-features">Count Features</a></h3>
+<p><strong>Examples</strong>: Number of purchases, page visits, words in document</p>
+<p><strong>Strategy</strong>: Consider log transformation first, then scale</p>
+<pre><code class="language-rust">// Apply log transform
+let x_log: Vec&lt;f32&gt; = x.iter()
+    .map(|&amp;count| (count + 1.0).ln())  // +1 to handle zeros
+    .collect();
+
+// Then scale
+scaler.fit(&amp;x_log)?;
+let x_scaled = scaler.transform(&amp;x_log)?;</code></pre>
+<h3 id="categorical-features-encoded"><a class="header" href="#categorical-features-encoded">Categorical Features (Encoded)</a></h3>
+<p><strong>One-hot encoded</strong>: No scaling needed (already 0/1)
+<strong>Label encoded</strong> (ordinal): Scale if using distance-based algorithms</p>
+<h2 id="impact-on-model-performance"><a class="header" href="#impact-on-model-performance">Impact on Model Performance</a></h2>
+<h3 id="example-k-nn-on-employee-data"><a class="header" href="#example-k-nn-on-employee-data">Example: K-NN on Employee Data</a></h3>
+<pre><code>Dataset:
+  Feature 1: Salary [30k-120k]
+  Feature 2: Age [25-40]
+  Feature 3: Years of experience [1-15]
+
+Task: Predict employee attrition
+
+Without scaling:
+  K-NN accuracy: 62%
+  (Salary dominates distance calculation)
+
+With StandardScaler:
+  K-NN accuracy: 84%
+  (All features contribute meaningfully)
+
+Improvement: +22 percentage points! ✅
+</code></pre>
+<h3 id="example-neural-network-convergence"><a class="header" href="#example-neural-network-convergence">Example: Neural Network Convergence</a></h3>
+<pre><code>Network: 3-layer MLP
+Dataset: Mixed-scale features
+
+Without scaling:
+  Epochs to converge: 500
+  Training time: 45 seconds
+
+With StandardScaler:
+  Epochs to converge: 50
+  Training time: 5 seconds
+
+Speedup: 9x faster! ✅
+</code></pre>
+<h2 id="decision-guide"><a class="header" href="#decision-guide">Decision Guide</a></h2>
+<h3 id="flowchart-which-scaler"><a class="header" href="#flowchart-which-scaler">Flowchart: Which Scaler?</a></h3>
+<pre><code>Start
+  │
+  ├─ Are there outliers?
+  │    ├─ YES → RobustScaler
+  │    └─ NO  → Continue
+  │
+  ├─ Need bounded range [0,1]?
+  │    ├─ YES → MinMaxScaler
+  │    └─ NO  → Continue
+  │
+  ├─ Is data approximately normal?
+  │    ├─ YES → StandardScaler ✓ (default choice)
+  │    └─ NO  → Continue
+  │
+  ├─ Is data sparse (many zeros)?
+  │    ├─ YES → MaxAbsScaler
+  │    └─ NO  → StandardScaler
+</code></pre>
+<h3 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Your Situation</th><th>Recommended Scaler</th></tr></thead><tbody>
+<tr><td>Default choice, unsure</td><td><strong>StandardScaler</strong></td></tr>
+<tr><td>Neural networks</td><td><strong>StandardScaler</strong> or <strong>MinMaxScaler</strong></td></tr>
+<tr><td>K-NN, K-Means, SVM</td><td><strong>StandardScaler</strong></td></tr>
+<tr><td>Data has outliers</td><td><strong>RobustScaler</strong></td></tr>
+<tr><td>Need [0,1] bounds</td><td><strong>MinMaxScaler</strong></td></tr>
+<tr><td>Sparse data</td><td><strong>MaxAbsScaler</strong></td></tr>
+<tr><td>Tree-based models</td><td><strong>No scaling</strong> (optional)</td></tr>
+</tbody></table>
+</div>
+<h2 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h2>
+<h3 id="mistake-1-forgetting-to-scale-test-data"><a class="header" href="#mistake-1-forgetting-to-scale-test-data">Mistake 1: Forgetting to Scale Test Data</a></h3>
+<pre><code class="language-rust">// ❌ WRONG
+scaler.fit(&amp;x_train)?;
+let x_train_scaled = scaler.transform(&amp;x_train)?;
+// ... train model on x_train_scaled ...
+let predictions = model.predict(&amp;x_test)?;  // ← Unscaled!</code></pre>
+<p><strong>Result</strong>: Model sees different scale at test time, terrible performance.</p>
+<h3 id="mistake-2-scaling-target-variable-unnecessarily"><a class="header" href="#mistake-2-scaling-target-variable-unnecessarily">Mistake 2: Scaling Target Variable Unnecessarily</a></h3>
+<pre><code class="language-rust">// ❌ Usually unnecessary for regression targets
+scaler_y.fit(&amp;y_train)?;
+let y_train_scaled = scaler_y.transform(&amp;y_train)?;</code></pre>
+<p><strong>When needed</strong>: Only if target has extreme range (e.g., house prices in millions)</p>
+<p><strong>Better solution</strong>: Use regularization or log-transform target</p>
+<h3 id="mistake-3-scaling-categorical-encoded-features"><a class="header" href="#mistake-3-scaling-categorical-encoded-features">Mistake 3: Scaling Categorical Encoded Features</a></h3>
+<pre><code class="language-rust">// One-hot encoded: [1, 0, 0] for category A
+//                  [0, 1, 0] for category B
+
+// ❌ WRONG: Scaling destroys categorical meaning
+scaler.fit(&amp;one_hot_encoded)?;</code></pre>
+<p><strong>Correct</strong>: Don't scale one-hot encoded features!</p>
+<h2 id="aprender-example-complete-pipeline"><a class="header" href="#aprender-example-complete-pipeline">aprender Example: Complete Pipeline</a></h2>
+<pre><code class="language-rust">use aprender::preprocessing::StandardScaler;
+use aprender::classification::KNearestNeighbors;
+use aprender::model_selection::train_test_split;
+use aprender::prelude::*;
+
+fn full_pipeline_example(x: &amp;Matrix&lt;f32&gt;, y: &amp;Vec&lt;i32&gt;) -&gt; Result&lt;f32&gt; {
+    // 1. Split data FIRST
+    let (x_train, x_test, y_train, y_test) =
+        train_test_split(x, y, 0.2, Some(42))?;
+
+    // 2. Create and fit scaler on training data ONLY
+    let mut scaler = StandardScaler::new();
+    scaler.fit(&amp;x_train)?;
+
+    // 3. Transform both train and test using same scaler
+    let x_train_scaled = scaler.transform(&amp;x_train)?;
+    let x_test_scaled = scaler.transform(&amp;x_test)?;
+
+    // 4. Train model on scaled data
+    let mut model = KNearestNeighbors::new(5);
+    model.fit(&amp;x_train_scaled, &amp;y_train)?;
+
+    // 5. Evaluate on scaled test data
+    let accuracy = model.score(&amp;x_test_scaled, &amp;y_test);
+
+    println!(&quot;Learned scaling parameters:&quot;);
+    println!(&quot;  Mean: {:?}&quot;, scaler.mean());
+    println!(&quot;  Std:  {:?}&quot;, scaler.std());
+    println!(&quot;\nTest accuracy: {:.4}&quot;, accuracy);
+
+    Ok(accuracy)
+}</code></pre>
+<h2 id="further-reading"><a class="header" href="#further-reading">Further Reading</a></h2>
+<p><strong>Theory</strong>:</p>
+<ul>
+<li>Standardization: Common practice in statistics since 1950s</li>
+<li>Min-Max Scaling: Standard normalization technique</li>
+</ul>
+<p><strong>Practical</strong>:</p>
+<ul>
+<li>sklearn documentation: Detailed scaler comparisons</li>
+<li>&quot;Feature Engineering for Machine Learning&quot; (Zheng &amp; Casari)</li>
+</ul>
+<h2 id="related-chapters"><a class="header" href="#related-chapters">Related Chapters</a></h2>
+<ul>
+<li><a href="../examples/data-preprocessing-scalers.html">Data Preprocessing with Scalers</a> - Hands-on examples</li>
+<li><a href="../examples/knn-iris.html">K-NN Iris Example</a> - Scaling impact on K-NN</li>
+<li><a href="./gradient-descent.html">Gradient Descent Theory</a> - Why scaling accelerates optimization</li>
+</ul>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Concept</th><th>Key Takeaway</th></tr></thead><tbody>
+<tr><td><strong>Why scale?</strong></td><td>Distance-based algorithms and gradient descent need similar feature scales</td></tr>
+<tr><td><strong>StandardScaler</strong></td><td>Default choice: centers at 0, scales by std dev</td></tr>
+<tr><td><strong>MinMaxScaler</strong></td><td>When bounded [0,1] range needed, no outliers</td></tr>
+<tr><td><strong>Fit on training</strong></td><td>CRITICAL: Only fit scaler on training data, apply to test</td></tr>
+<tr><td><strong>Algorithms needing scaling</strong></td><td>K-NN, K-Means, SVM, Neural Networks, PCA</td></tr>
+<tr><td><strong>Algorithms NOT needing scaling</strong></td><td>Decision Trees, Random Forests, Naive Bayes</td></tr>
+<tr><td><strong>Performance impact</strong></td><td>Can improve accuracy by 20%+ and speed by 10-100x</td></tr>
+</tbody></table>
+</div>
+<p>Feature scaling is often the <strong>single most important preprocessing step</strong> in machine learning pipelines. Proper scaling can mean the difference between a model that fails to converge and one that achieves state-of-the-art performance.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../ml-fundamentals/webassembly-ml.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../ml-fundamentals/audio-processing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../ml-fundamentals/webassembly-ml.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../ml-fundamentals/audio-processing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
